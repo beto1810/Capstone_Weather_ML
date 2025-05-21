@@ -1,0 +1,100 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.env.*
+venv/
+.venv/
+env/
+ENV/
+.env
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# dbt
+dbt_modules/
+dbt_packages/
+dbt_profiles.yml
+target/
+logs/
+.user.yml
+
+# Airflow
+airflow/logs/
+airflow/airflow.db
+airflow/unittests.cfg
+airflow.cfg
+webserver_config.py
+airflow-webserver.pid
+
+# Docker
+postgres_data/
+*.log
+.docker/
+docker-compose.override.yml
+
+# Kafka
+kafka-logs/
+kafka/data/
+zookeeper-data/
+/data/
+*.offset
+
+# Jupyter
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*.nbconvert.ipynb
+
+# General
+*.sqlite3
+*.db
+*.bak
+*.swp
+*.swo
+tmp/
+temp/
+.cache/
+
+# Secrets
+secrets.*
+*.key
+*.pem
+*.cert
+*.password
+credentials.json
+config.json
+
+# Local profiles
+dbt_weather/profiles/profiles.yml
+profiles.yml
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+pip-wheel-metadata/
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE specific
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+*.log

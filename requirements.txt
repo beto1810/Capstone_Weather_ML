@@ -1,0 +1,11 @@
+apache-airflow==2.7.2
+apache-airflow-providers-snowflake
+apache-airflow-providers-common-sql
+kafka-python==2.0.2
+requests
+snowflake-connector-python
+dbt-core==1.7.5
+dbt-snowflake==1.7.5
+psycopg2-binary
+confluent_kafka
+dotenv
