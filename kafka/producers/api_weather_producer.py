@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from kafka import KafkaProducer
 
-
+load_dotenv()
     
 def fetch_data_from_api():
     API_KEY = os.getenv('OPENWEATHER_API_KEY')
