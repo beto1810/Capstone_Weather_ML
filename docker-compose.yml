@@ -43,8 +43,8 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: 'your_fernet_key_here'
-      AIRFLOW__WEBSERVER__SECRET_KEY: 'your_webserver_secret_key'
+     #AIRFLOW__CORE__FERNET_KEY: ''
+      #AIRFLOW__WEBSERVER__SECRET_KEY: ''
     volumes:
       - ./airflow:/opt/airflow
     command: webserver
@@ -56,7 +56,7 @@ services:
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: 'your_fernet_key_here'
+      #AIRFLOW__CORE__FERNET_KEY: 'your_fernet_key_here'
     volumes:
       - ./airflow:/opt/airflow
     command: scheduler
