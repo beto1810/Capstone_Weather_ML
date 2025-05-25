@@ -1,6 +1,5 @@
 import requests
 import json
-from confluent_kafka import Producer
 import time
 import os 
 from dotenv import load_dotenv
@@ -21,7 +20,7 @@ def fetch_data_from_api():
 
 def produce_messages():
     producer = KafkaProducer(
-        bootstrap_servers='localhost:9092',
+        bootstrap_servers='kafka:9092',
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
     print("Starting producer...", flush=True)

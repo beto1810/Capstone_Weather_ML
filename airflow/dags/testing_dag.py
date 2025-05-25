@@ -1,7 +1,5 @@
 # import dependencies
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 import logging  
 import os
@@ -10,11 +8,12 @@ from pathlib import Path
 import requests
 import snowflake.connector
 from airflow.decorators import dag, task
-from airflow.models import Variable
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
-from airflow.sensors.base import PokeReturnValue
-from airflow.hooks.base import BaseHook
+import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from Weather_ML.kafka.producers.api_weather_producer import produce_messages
+from Weather_ML.kafka.consumers.api_weather_consumer import consume_messages
 # Load environment variables from .env file
 load_dotenv()
 
@@ -35,7 +34,13 @@ def get_snowflake_hook():
         raise
     return result.to_dict()
 
+@task
+def fetch_weather_data():
+    return produce_messages()
 
+@task
+def consume_weather():
+    return consume_messages()
 @dag(
     schedule_interval='@daily',
     start_date=datetime(2023, 10, 1),
@@ -50,6 +55,9 @@ def get_snowflake_hook():
 )
 def weather_data_pipeline():
     test_connection  = get_snowflake_hook()
-    test_connection
+    producer_weather_data = fetch_weather_data()
+    consume_weather_data = consume_weather()
+
+    test_connection >> producer_weather_data >> consume_weather_data
 
 dag = weather_data_pipeline()

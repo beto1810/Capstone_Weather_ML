@@ -6,3 +6,6 @@ COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY kafka/ ./kafka/
+
+RUN pip install kafka-python
+RUN pip install confluent-kafka

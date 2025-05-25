@@ -9,3 +9,5 @@ dbt-snowflake==1.7.5
 psycopg2-binary
 confluent_kafka
 dotenv
+kafka-python
+pandas
