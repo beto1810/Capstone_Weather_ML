@@ -6,7 +6,6 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 import requests
-import snowflake.connector
 from airflow.decorators import dag, task
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 import sys
@@ -36,13 +35,20 @@ def get_snowflake_hook():
 
 @task
 def fetch_weather_data():
-    return produce_messages()
+    try:
+        result = produce_messages()
+        logging.info(f"Successfully produced {result} messages to Kafka")
+        return result
+    except Exception as e:
+        logging.error("Failed to produce messages to Kafka", exc_info=True)
+        raise
 
 @task
 def consume_weather():
-    return consume_messages()
+    return  consume_messages()
+    
 @dag(
-    schedule_interval='@daily',
+    schedule_interval='5 * * * *',
     start_date=datetime(2023, 10, 1),
     catchup=False,
     default_args={
@@ -58,6 +64,7 @@ def weather_data_pipeline():
     producer_weather_data = fetch_weather_data()
     consume_weather_data = consume_weather()
 
-    test_connection >> producer_weather_data >> consume_weather_data
+    test_connection >> producer_weather_data
+    test_connection >> consume_weather_data 
 
 dag = weather_data_pipeline()
