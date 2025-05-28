@@ -1,0 +1,100 @@
+version: 2
+
+sources:
+  - name: raw_weather_data
+    database: KAFKA_AIRFLOW_WEATHER  
+    schema: RAW_WEATHER
+    description: "Raw weather data collected from WeatherAPI.com for Vietnamese cities"
+    tables:
+      - name: RAW_WEATHER_DATA
+        description: "Current weather conditions for various cities in Vietnam"
+        columns:
+          - name: city
+            description: "The name of the city"
+            tests:
+              - not_null
+
+          - name: last_updated
+            description: "Timestamp when the weather data was last updated"
+            tests:
+              - not_null
+
+          - name: temp_c
+            description: "Temperature in Celsius"
+            tests:
+              - not_null
+
+          - name: temp_f
+            description: "Temperature in Fahrenheit"
+
+          - name: is_day
+            description: "Boolean indicating if it's daytime (1) or nighttime (0)"
+
+          - name: condition_text
+            description: "Text description of weather condition"
+            tests:
+              - not_null
+
+          - name: condition_icon
+            description: "URL to weather condition icon"
+
+          - name: condition_code
+            description: "Numeric code for weather condition"
+
+          - name: wind_mph
+            description: "Wind speed in miles per hour"
+
+          - name: wind_kph
+            description: "Wind speed in kilometers per hour"
+
+          - name: wind_degree
+            description: "Wind direction in degrees"
+
+          - name: wind_dir
+            description: "Cardinal direction of wind (N, S, E, W, etc.)"
+
+          - name: pressure_mb
+            description: "Atmospheric pressure in millibars"
+
+          - name: pressure_in
+            description: "Atmospheric pressure in inches"
+
+          - name: precip_mm
+            description: "Precipitation amount in millimeters"
+
+          - name: precip_in
+            description: "Precipitation amount in inches"
+
+          - name: humidity
+            description: "Relative humidity percentage"
+            tests:
+              - not_null
+
+          - name: cloud
+            description: "Cloud cover percentage"
+
+          - name: feelslike_c
+            description: "Feels like temperature in Celsius"
+
+          - name: feelslike_f
+            description: "Feels like temperature in Fahrenheit"
+
+          - name: vis_km
+            description: "Visibility in kilometers"
+
+          - name: vis_miles
+            description: "Visibility in miles"
+
+          - name: uv
+            description: "UV index"
+
+          - name: gust_mph
+            description: "Wind gust speed in miles per hour"
+
+          - name: gust_kph
+            description: "Wind gust speed in kilometers per hour"
+
+          - name: loaded_at
+            description: "Timestamp when the record was loaded into Snowflake"
+            tests:
+              - not_null

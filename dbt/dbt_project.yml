@@ -23,4 +23,18 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
-  # directory to be used for documentation
+# Add model configurations
+models:
+  dbt_weather:
+    # Config defaults for all models in dbt_weather
+    +materialized: view
+    
+    # Staging models configuration
+    staging:
+      +schema: WEATHER_ANALYTICS
+      +database: KAFKA_AIRFLOW_WEATHER
+      +materialized: view
+      +tags: ["staging"]
+
+vars:
+  snowflake_database: "KAFKA_AIRFLOW_WEATHER"
