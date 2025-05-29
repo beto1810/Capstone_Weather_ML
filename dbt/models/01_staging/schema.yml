@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: stg_vietnam_provinces
+    description: >
+      Staging model for Vietnamese provinces and cities.
+      This model is incrementally updated and maintains historical changes.
+    config:
+      tags: ['staging', 'reference_data']
+    columns:
+      - name: province_id
+        description: "Unique code for the city/province"
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('stg_vietnam_districts')
+              field: province_id
+
+      - name: province_name
+        description: "English name of the city/province"
+        tests:
+          - unique
+          - not_null
+
+      - name: province_name_vn
+        description: "Vietnamese name of the city/province"
+        tests:
+          - not_null
+
+      - name: latitude
+        description: "Geographical latitude coordinate"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 8.0  # Southernmost point of Vietnam
+              max_value: 24.0 # Northernmost point of Vietnam
+
+      - name: longitude
+        description: "Geographical longitude coordinate"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 102.0  # Westernmost point of Vietnam
+              max_value: 110.0  # Easternmost point of Vietnam
+
+
+      - name: loaded_at
+        description: "Timestamp when dbt last processed this record"
+        tests:
+          - not_null
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - province_id
+            - loaded_at 
+

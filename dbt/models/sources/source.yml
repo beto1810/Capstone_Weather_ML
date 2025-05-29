@@ -98,3 +98,67 @@ sources:
             description: "Timestamp when the record was loaded into Snowflake"
             tests:
               - not_null
+
+  - name : vietnam_geo_data
+    database: KAFKA_AIRFLOW_WEATHER  
+    schema: VIETNAM_GEO
+    description: "List of Vietnamese provinces,cities,district with their codes, names and geographical information"
+    tables:
+      - name: VIETNAM_PROVINCES
+        description: "Provinces in Vietnam with their codes, names and geographical information"
+        columns:
+          - name: Province_Code
+            description: "Province code"
+            tests:
+              - not_null
+
+          - name: EN_NAME
+            description: "Name of the province in English"
+            tests:
+              - not_null 
+          
+          - name: VN_NAME 
+            description: "Name of the province in Vietnamese"
+            tests:
+              - not_null
+
+          - name: Latitude  
+            description: "Latitude of the province"
+            tests:
+              - not_null
+
+          - name: Longitude
+            description: "Longitude of the province"
+            tests:
+              - not_null
+      - name: VIETNAM_DISTRICTS
+        description: "Districts in Vietnam with their codes, names and geographical information"
+        columns:
+          - name: District_Code
+            description: "District code"
+            tests:
+              - not_null
+              
+          - name: Province_Code
+            description: "Code of the province to which the district belongs"
+            tests:
+              - not_null
+
+          - name: EN_NAME
+            description: "Name of the district in English"
+            tests:
+              - not_null 
+
+          - name: VN_NAME 
+            description: "Name of the district in Vietnamese"
+            tests:
+              - not_null
+
+          - name: Latitude  
+            description: "Latitude of the district"
+      
+
+          - name: Longitude
+            description: "Longitude of the district"
+         
+       
