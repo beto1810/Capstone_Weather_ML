@@ -2,9 +2,7 @@ version: 2
 
 models:
   - name: stg_vietnam_provinces
-    description: >
-      Staging model for Vietnamese provinces and cities.
-      This model is incrementally updated and maintains historical changes.
+    description: "{{ doc('weather_data') }}"
     config:
       tags: ['staging', 'reference_data']
     columns:
@@ -56,3 +54,84 @@ models:
             - province_id
             - loaded_at 
 
+  - name: stg_weather_data
+    description: "{{ doc('weather_data') }}"    
+    config:
+      tags: ['staging', 'weather' ]
+    columns:
+      - name: province_name
+        description: "Name of the province where weather was measured"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_vietnam_provinces')
+              field: province_name
+
+      - name: weather_updated_at
+        description: "Timestamp when weather measurement was taken"
+        tests:
+          - not_null
+
+      - name: temperature_celsius
+        description: "Temperature in Celsius"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: -20
+              max_value: 50
+
+      - name: humidity_percent
+        description: "Relative humidity percentage"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+      - name: precipitation_mm
+        description: "Precipitation amount in millimeters"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+
+      - name: wind_speed_kph
+        description: "Wind speed in kilometers per hour"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 200
+
+      - name: wind_direction
+        description: "Cardinal direction of wind (N, NE, E, etc.)"
+ 
+
+      - name: pressure_millibars
+        description: "Atmospheric pressure in millibars"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 870
+              max_value: 1090
+
+      - name: weather_condition
+        description: "Text description of weather condition"
+        tests:
+          - not_null
+
+      - name: cloud_cover_percent
+        description: "Percentage of sky covered by clouds"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+      - name: uv_index
+        description: "UV radiation index"
+      
+
+      - name: record_loaded_at
+        description: "Timestamp when record was loaded into the warehouse"
+        tests:
+          - not_null
+
+  

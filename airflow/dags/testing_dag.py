@@ -12,6 +12,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from Weather_ML.kafka.producers.api_weather_producer import produce_messages
+from Weather_ML.kafka.producers.api_weather_producer import get_cities_from_snowflake
 from Weather_ML.kafka.consumers.api_weather_consumer import consume_messages
 # Load environment variables from .env file
 load_dotenv()
@@ -36,7 +37,12 @@ def get_snowflake_hook():
 @task
 def fetch_weather_data():
     try:
-        result = produce_messages()
+        cities_df = get_cities_from_snowflake()
+        if cities_df.empty:
+            logging.warning("No active cities found in Snowflake. Skipping data production.")
+            return 0
+        logging.info(f"Fetched {len(cities_df['province_name'])} active cities from Snowflake")
+        result = produce_messages(cities_df)
         logging.info(f"Successfully produced {result} messages to Kafka")
         return result
     except Exception as e:

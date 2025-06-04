@@ -98,3 +98,12 @@ htmlcov/
 *.sublime-workspace
 
 *.log
+
+# Crawling Weather Data
+crawling_weather/
+**/crawling_weather/
+crawling_weather/**/*
+
+!training_weather_model/*.pkl
+training_weather_model/multioutput_regressor.pkl
+training_weather_model/multioutput_regressor.pkl

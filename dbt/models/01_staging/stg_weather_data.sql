@@ -7,7 +7,7 @@ with source_cte as (
 cast_type as (
 
     select
-        cast(city as varchar) as city_name,
+        cast(province_name as varchar) as province_name,
         cast(last_updated as timestamp) as weather_updated_at,
         cast(temp_c as float) as temperature_celsius,
         cast(temp_f as float) as temperature_fahrenheit,

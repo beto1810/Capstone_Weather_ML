@@ -3,7 +3,7 @@
     config( materialized='incremental', 
     unique_key=['province_id'], 
     incremental_strategy='merge', 
-    merge_update_columns=['province_name','province_name_vn', 'latitude', 'longitude', 'updated_at'] ) }}
+    merge_update_columns=['province_name','province_name_vn', 'latitude', 'longitude', 'region','updated_at'] ) }}
 
 with transformed as ( 
     select 
@@ -12,6 +12,7 @@ with transformed as (
             province_name_vn, 
             latitude, 
             longitude, 
+            region,
             current_timestamp() as created_at, 
             current_timestamp() as updated_at
             from {{ ref('stg_vietnam_provinces') }} )
@@ -24,6 +25,7 @@ with transformed as (
             transformed.province_name_vn,
             transformed.latitude, 
             transformed.longitude, 
+            transformed.region,
             coalesce(existing.created_at, transformed.created_at) as created_at, 
             transformed.updated_at, 
             from transformed 
@@ -33,6 +35,7 @@ with transformed as (
                 or transformed.province_name != existing.province_name 
                 or transformed.latitude != existing.latitude 
                 or transformed.longitude != existing.longitude 
+                or transformed.region != existing.region
 {% else %} -- First run - process all records 
     select * from transformed 
 {% endif %}

@@ -1,0 +1,139 @@
+version: 2
+
+models:
+  - name: dim_vietnam_provinces
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['dimension']
+    columns:
+      - name: province_id
+        description: "Surrogate key"
+        tests:
+          - unique
+          - not_null
+      
+      - name: region
+        description: "Geographical region"
+      
+      - name: valid_from
+        description: "SCD Type 2 valid from date"
+      
+      - name: valid_to
+        description: "SCD Type 2 valid to date"
+
+  - name: fct_weather_province
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['fact', 'weather', 'province']
+    columns:
+      - name: province_id
+        description: "Foreign key to dim_vietnam_provinces"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vietnam_provinces')
+              field: province_id
+
+      - name: weather_date
+        description: "Date of weather measurement"
+        tests:
+          - not_null
+
+      - name: avg_temperature
+        description: "Average daily temperature in Celsius"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: -20
+              max_value: 50
+
+      - name: max_temperature
+        description: "Maximum daily temperature in Celsius"
+        tests:
+          - not_null
+
+      - name: min_temperature
+        description: "Minimum daily temperature in Celsius"
+        tests:
+          - not_null
+
+      - name: avg_humidity
+        description: "Average daily humidity percentage"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+      - name: sum_precipitation
+        description: "Total daily precipitation in mm"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: chance_rain
+        description: "Probability of rain (0-1)"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+
+      - name: avg_wind_kph
+        description: "Average wind speed in km/h"
+        tests:
+          - not_null
+
+
+
+  - name: fct_weather_region
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['fact', 'weather', 'region']
+    columns:
+      - name: region
+        description: "Geographical region name"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vietnam_provinces')
+              field: region
+
+      - name: weather_date
+        description: "Date of weather measurement"
+        tests:
+          - not_null
+
+      - name: avg_temperature
+        description: "Average temperature across all provinces in region"
+        tests:
+          - not_null
+
+      - name: max_temperature
+        description: "Highest temperature recorded in region"
+        tests:
+          - not_null
+
+      - name: min_temperature
+        description: "Lowest temperature recorded in region"
+        tests:
+          - not_null
+
+      - name: avg_humidity
+        description: "Average humidity across region"
+        tests:
+          - not_null
+
+      - name: sum_precipitation
+        description: "Total precipitation across all provinces in region"
+        tests:
+          - not_null
+
+      - name: avg_wind_kph
+        description: "Average wind speed across region"
+        tests:
+          - not_null
+
+  
+
+      

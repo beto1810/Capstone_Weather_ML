@@ -31,25 +31,24 @@ def get_cities_from_snowflake():
             account=os.getenv('SNOWFLAKE_ACCOUNT'),
             warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
             database=os.getenv('SNOWFLAKE_DATABASE'),
-            schema=os.getenv('SNOWFLAKE_SCHEMA_CITY')
+            schema=os.getenv('SNOWFLAKE_SCHEME_ANALYSIS')
         )
         
         cursor = conn.cursor()
         
         # Fetch cities data
         query = """
-        SELECT EN_NAME, latitude, longitude 
-        FROM vietnam_provinces 
-        WHERE is_active = TRUE
+        SELECT province_name, latitude, longitude 
+        FROM dim_vietnam_provinces 
         """
         
         cursor.execute(query)
         cities_df = pd.DataFrame(
             cursor.fetchall(), 
-            columns=['EN_NAME', 'latitude', 'longitude']
+            columns=['province_name', 'latitude', 'longitude']
         )
         
-        logger.info(f"Loaded {len(cities_df)} cities from Snowflake")
+        logger.info(f"Loaded {len(cities_df['province_name'])} cities from Snowflake")
         return cities_df
         
     except Exception as e:
@@ -80,39 +79,40 @@ def produce_messages(cities_df,max_retries=3, timeout=10):
         max_block_ms=30000,  # Added max block time
         compression_type='gzip'  # Added compression for better performance
     )
-    
+    messages_processed = 0
     logger.info("Starting producer...")
     try:
-        for city,lat,lon in zip(cities_df['EN_NAME'],cities_df['latitude'], cities_df['longitude']):
+        for province,lat,lon in zip(cities_df['province_name'],cities_df['latitude'], cities_df['longitude']):
             retries = 0
             while retries < max_retries:
                 try:
                     data = fetch_data_from_api(lat, lon)
                     data_weather = data['current']
-                    data_weather['city'] = city
+                    data_weather['province_name'] = province
                     
-                    logger.info(f"Sending data for {data_weather['city']}...")
+                    logger.info(f"Sending data for {data_weather['province_name']}...")
                     
                     # Send with increased timeout
                     future = producer.send('data-weather', data_weather)
                     record_metadata = future.get(timeout=timeout)
                     
-                    logger.info(f"Successfully sent data for {data_weather['city']} "
+                    logger.info(f"Successfully sent data for {data_weather['province_name']} "
                                 f"to partition {record_metadata.partition} "
                                 f"at offset {record_metadata.offset}")
                     
                     messages_processed += 1
                     break  # Success, exit retry loop
-
+        
+    
                 except requests.exceptions.RequestException as e:
-                    logger.error(f"API error for {city}: {str(e)}")
+                    logger.error(f"API error for {province}: {str(e)}")
                     break  # Don't retry API errors
 
                 except KafkaError as e:
-                    logger.error(f"Error sending data for {city}: {str(e)}")
+                    logger.error(f"Error sending data for {province}: {str(e)}")
                     retries += 1
                     if retries == max_retries:
-                        logger.error(f"Failed to send data for {city} after {max_retries} attempts")
+                        logger.error(f"Failed to send data for {province} after {max_retries} attempts")
                     else:
                         logger.info(f"Retrying... ({retries}/{max_retries})")
                         time.sleep(1)  # Wait before retry
@@ -120,7 +120,8 @@ def produce_messages(cities_df,max_retries=3, timeout=10):
             time.sleep(0.3)  # Wait between cities
 
         logger.info("Finished processing all cities.")
-            
+        return messages_processed
+     
     except KeyboardInterrupt:
         logger.info("Producer stopped by user")
     except Exception as e:
@@ -130,6 +131,8 @@ def produce_messages(cities_df,max_retries=3, timeout=10):
         producer.flush()
         producer.close()
         logger.info("Producer closed")
+
+        
 
 # def send_to_dlq(producer, data, error_msg):
 #     """Send failed messages to DLQ with error context"""
@@ -150,7 +153,7 @@ if __name__ == "__main__":
         if cities_df.empty:
             logger.error("No cities found in Snowflake. Exiting.")
         else:
-            logger.info(f"Found {len(cities_df)} cities. Starting to produce messages...")
+            logger.info(f"Found {len(cities_df['province_name'])} cities. Starting to produce messages...")
             messages_processed = produce_messages(cities_df)
             logger.info(f"Total messages produced: {messages_processed}")
     except Exception as e:

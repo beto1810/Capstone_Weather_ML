@@ -9,8 +9,8 @@ sources:
       - name: RAW_WEATHER_DATA
         description: "Current weather conditions for various cities in Vietnam"
         columns:
-          - name: city
-            description: "The name of the city"
+          - name: province_name
+            description: "Name of the province or city"
             tests:
               - not_null
 

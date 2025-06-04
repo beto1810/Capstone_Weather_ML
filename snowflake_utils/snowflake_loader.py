@@ -23,7 +23,7 @@ def load_to_snowflake(data):
         # Create a more detailed table schema matching the Weather API response
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS raw_weather_data (
-                city VARCHAR,
+                province_name VARCHAR,
                 last_updated TIMESTAMP_NTZ,
                 temp_c FLOAT,
                 temp_f FLOAT,
@@ -55,7 +55,7 @@ def load_to_snowflake(data):
         # Insert data with all available fields
         cursor.execute("""
             INSERT INTO raw_weather_data (
-                city, last_updated, temp_c, temp_f, is_day,
+                province_name, last_updated, temp_c, temp_f, is_day,
                 condition_text, condition_icon, condition_code,
                 wind_mph, wind_kph, wind_degree, wind_dir,
                 pressure_mb, pressure_in, precip_mm, precip_in,
@@ -66,7 +66,7 @@ def load_to_snowflake(data):
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s)
         """, (
-            data['city'],
+            data['province_name'],
             data['last_updated'],
             data['temp_c'],
             data['temp_f'],
@@ -94,7 +94,7 @@ def load_to_snowflake(data):
         ))
         
         conn.commit()
-        logging.info(f"✅ Successfully loaded data to Snowflake for city: {data['city']}")
+        logging.info(f"✅ Successfully loaded data to Snowflake for city: {data['province_name']}")
         
     except Exception as e:
         logging.error(f"❌ Error loading to Snowflake: {e}")
