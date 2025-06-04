@@ -1,21 +1,111 @@
 # Weather ML Project
 
 ## Overview
-This project is a machine learning pipeline for weather data processing and analysis. It incorporates Apache Airflow for workflow orchestration, Apache Kafka for real-time data streaming, and dbt for data transformation.
+This project is a complete machine learning and analytics pipeline for weather data in Vietnam. It integrates real-time data ingestion, batch processing, data transformation, analytics, and prediction. The stack includes Apache Airflow for orchestration, Apache Kafka for streaming, dbt for data modeling, and supports ML model training and deployment.
+
+---
 
 ## Features
-- **Data Pipeline Orchestration**: Using Apache Airflow
-- **Real-time Data Streaming**: Kafka producers and consumers for weather data
-- **Data Transformation**: dbt models for structured data transformation
+
+- **Data Pipeline Orchestration**: Automated workflows using Apache Airflow
+- **Real-time Data Streaming**: Kafka producers and consumers for ingesting weather data from APIs
+- **Data Transformation & Modeling**: dbt models for staging, intermediate, marts, and prediction layers
+- **Machine Learning**: Model training, evaluation, and prediction for weather forecasting
+- **Incremental & Historical Processing**: Efficient, scalable data handling with dbt incremental models
+- **Data Quality & Testing**: dbt tests for data integrity and relationships
 - **Containerized Architecture**: Docker-based deployment for all components
+- **Cloud & Local Storage**: Support for large model files via external storage (not tracked in git)
+- **Documentation & Monitoring**: dbt docs, Airflow UI, and logging
+
+---
 
 ## Project Structure
+
 ```
-├── airflow/           # Airflow DAGs and configurations
-├── dbt/              # Data transformation models
-├── kafka/            # Kafka producers and consumers
-├── configs/          # Configuration files
-├── data/            # Data storage
-└── scripts/         # Utility scripts
+├── airflow/                   # Airflow DAGs and configurations
+│   └── dags/                  # Custom DAGs for ETL and dbt runs
+├── dbt/                       # dbt project for data transformation
+│   ├── models/
+│   │   ├── 01_staging/        # Staging models (raw to clean)
+│   │   ├── 02_int/            # Intermediate models (feature engineering)
+│   │   ├── 03_marts/          # Fact and dimension models (analytics)
+│   │   └── 04_predict/        # Prediction models (ML outputs)
+│   ├── macros/                # Custom dbt macros
+│   ├── tests/                 # Custom dbt tests
+│   ├── seeds/                 # Static reference data
+│   └── docs/                  # dbt documentation
+├── kafka/                     # Kafka producers and consumers
+│   ├── producer.py            # Weather API producer
+│   └── consumer.py            # Data consumer for ingestion
+├── training_weather_model/    # ML model training scripts and (externally stored) model files
+├── configs/                   # Configuration files for all services
+├── data/                      # Local data storage (excluded from git)
+├── scripts/                   # Utility and helper scripts
+├── .gitignore                 # Git ignore rules (including large files)
+├── .gitattributes             # Git LFS and attribute settings
+└── README.md                  # Project documentation
 ```
 
+---
+
+## Data Flow
+
+1. **Ingestion**:  
+   - Kafka producer fetches weather data from APIs and streams to Kafka topics.
+   - Kafka consumer ingests data into the raw database.
+
+2. **Staging (dbt)**:  
+   - Raw weather data is cleaned and typed in `stg_weather_data`.
+   - Province and district reference data staged.
+
+3. **Intermediate (dbt)**:  
+   - Feature engineering and aggregation in `int_weather_province`
+
+4. **Marts (dbt)**:  
+   - Fact tables: `fct_weather_province`, `fct_weather_region`
+   - Dimension tables: `dim_vietnam_provinces`, `dim_vietnam_districts`
+
+5. **Prediction (dbt/ML)**:  
+   - ML models trained on historical data.
+   - Predictions written to `predict_weather_province` and similar tables.
+
+6. **Orchestration (Airflow)**:  
+   - DAGs schedule and monitor the entire pipeline, including dbt runs and ML tasks.
+
+---
+
+
+---
+
+## Data Quality & Testing
+
+- **dbt tests**: Not null, unique, relationships, accepted ranges
+- **Airflow monitoring**: Task success/failure, logs
+- **Model validation**: ML metrics and evaluation scripts
+
+---
+
+## Model Storage
+
+- **Large model files** (e.g., `.pkl` > 100MB) are not tracked in git or LFS due to GitHub limits.
+
+---
+
+## Documentation
+
+- **dbt docs**:  
+  Build and serve with  
+  `dbt docs generate && dbt docs serve --port 8081`
+- **Airflow UI**:  
+  Monitor DAGs and tasks at `http://localhost:8080`
+
+---
+
+## Maintenance
+
+- **Incremental loads**: dbt incremental models for efficient updates
+- **Full refresh**:  
+  `dbt run --full-refresh`
+- **Model retraining**: Update ML models as needed
+
+---
