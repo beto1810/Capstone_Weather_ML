@@ -47,5 +47,8 @@ jobs:
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake
 
+      - name: Clean DBT Artifacts
+        run: dbt clean
+
       - name: Run dbt build
         run: dbt build --target ci

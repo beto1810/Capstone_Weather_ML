@@ -73,4 +73,15 @@ final as (
         or final.district_name_vn != existing.district_name_vn
         or final.latitude != existing.latitude
         or final.longitude != existing.longitude
+{% else %} -- First run - process all records
+    select
+        final.district_id,
+        final.province_id,
+        final.district_name,
+        final.district_name_vn,
+        final.latitude,
+        final.longitude,
+        final.created_at,
+        final.updated_at
+    from final
 {% endif %}
