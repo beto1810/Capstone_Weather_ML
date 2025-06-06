@@ -54,7 +54,7 @@ jobs:
               schema: $SNOWFLAKE_SCHEMA
               threads: 4
               client_session_keep_alive: false
-        EOF
+
       - name: Lint SQL files with sqlfluff
         run: sqlfluff lint models --dialect snowflake
 
