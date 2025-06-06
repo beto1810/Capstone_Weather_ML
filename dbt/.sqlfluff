@@ -8,8 +8,6 @@ nocolor = False
 project_dir = .
 profiles_dir = ~/.dbt
 
-[sqlfluff:rules]
-max_line_length = 120  # tuỳ chọn theo coding guideline
 
 [sqlfluff:layout]
 indented_joins = true
