@@ -77,7 +77,6 @@ config.json
 
 # Local profiles
 dbt_weather/profiles/profiles.yml
-/dbt/.dbt/profiles.yml
 
 
 # Build artifacts

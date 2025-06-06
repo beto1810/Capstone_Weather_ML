@@ -17,7 +17,7 @@ jobs:
       SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
       SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
       SNOWFLAKE_ROLE: "USER_DBT_ROLE"
-      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}_${{ github.event.number }}
       SNOWFLAKE_CI_USER: ${{ secrets.SNOWFLAKE_CI_USER }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
 
@@ -30,27 +30,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Ensure dbt profiles directory exists
-        run: mkdir -p ~/.dbt
-
-      - name: Create profiles.yml
-        run: |
-          cat <<EOT > ~/.dbt/profiles.yml
-          dbt_weather:
-            outputs:
-              ci:
-                type: snowflake
-                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-                user: ${{ secrets.SNOWFLAKE_CI_USER }}
-                private_key: |
-                  ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
-                role: USER_DBT_ROLE
-                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-                database: ${{ secrets.SNOWFLAKE_DATABASE }}
-                schema: ${{ secrets.SNOWFLAKE_SCHEMA }}
-            target: ci
-          EOT
-
       - name: Install dbt & sqlfluff
         run: |
           pip install dbt-core dbt-snowflake sqlfluff
@@ -59,9 +38,6 @@ jobs:
 
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake
-
-      - name: Debug dbt setup
-        run: dbt debug
 
       - name: Run dbt build
         run: dbt build --target ci
