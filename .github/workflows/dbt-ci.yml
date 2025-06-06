@@ -10,7 +10,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: weather_ml
+        working-directory: dbt
 
     env:
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -34,10 +34,29 @@ jobs:
         run: |
           pip install dbt-core dbt-snowflake sqlfluff
           pip install sqlfluff-templater-dbt
-          dbt deps
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Set up dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          pwd
+          cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
+          ls -la ~/.dbt
+        working-directory: dbt
 
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake
+
+      - name: Clean DBT Artifacts
+        run: dbt clean
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: compile dbt models
+        run: dbt compile --target ci
 
       - name: Run dbt build
         run: dbt build --target ci

@@ -8,3 +8,6 @@ nocolor = False
 project_dir = .
 profiles_dir = ~/.dbt
 
+
+[sqlfluff:lint]
+exclude_paths = dbt/dbt_packages/*
