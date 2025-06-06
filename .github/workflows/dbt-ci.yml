@@ -36,6 +36,26 @@ jobs:
           pip install sqlfluff-templater-dbt
           dbt deps
 
+      - name: Set up dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          dbt_weather:
+            target: ci
+            outputs:
+              ci:
+                type: snowflake
+                account: $SNOWFLAKE_ACCOUNT
+                user: $SNOWFLAKE_CI_USER
+                private_key: $SNOWFLAKE_CI_USER_PRIVATE_KEY
+                role: $SNOWFLAKE_ROLE
+                database: $SNOWFLAKE_DATABASE
+                warehouse: $SNOWFLAKE_WAREHOUSE
+                schema: $SNOWFLAKE_SCHEMA
+                threads: 4
+                client_session_keep_alive: false
+          EOF
+
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake
 
