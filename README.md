@@ -29,7 +29,7 @@ This project is a complete machine learning and analytics pipeline for weather d
 │   │   ├── 01_staging/        # Staging models (raw to clean)
 │   │   ├── 02_int/            # Intermediate models (feature engineering)
 │   │   ├── 03_marts/          # Fact and dimension models (analytics) & Prediction models (ML outputs)
-│   │  
+│   │
 │   ├── macros/                # Custom dbt macros
 │   ├── tests/                 # Custom dbt tests
 │   ├── seeds/                 # Static reference data
@@ -50,31 +50,51 @@ This project is a complete machine learning and analytics pipeline for weather d
 
 ## Data Flow
 
-1. **Ingestion**:  
+1. **Ingestion**:
    - Kafka producer fetches weather data from APIs and streams to Kafka topics.
    - Kafka consumer ingests data into the raw database.
 
-2. **Staging (dbt)**:  
+2. **Staging (dbt)**:
    - Raw weather data is cleaned and typed in `stg_weather_data`.
    - Province and district reference data staged.
 
-3. **Intermediate (dbt)**:  
+3. **Intermediate (dbt)**:
    - Feature engineering and aggregation in `int_weather_province`
 
-4. **Marts (dbt)**:  
+4. **Marts (dbt)**:
    - Fact tables: `fct_weather_province`, `fct_weather_region`
    - Dimension tables: `dim_vietnam_provinces`, `dim_vietnam_districts`
 
-5. **Prediction (dbt/ML)**:  
+5. **Prediction (dbt/ML)**:
    - ML models trained on historical data.
    - Predictions written to `predict_weather_province` and similar tables.
 
-6. **Orchestration (Airflow)**:  
+6. **Orchestration (Airflow)**:
    - DAGs schedule and monitor the entire pipeline, including dbt runs and ML tasks.
 
 ---
 
+![ERD](docs/diagram.png)
 
+- For the editable schema, see the [DBML file](docs/erd.dbml) (compatible with [dbdiagram.io](https://dbdiagram.io)).
+
+---
+
+## Data Modeling Approach
+
+Our data model follows a modern data warehouse architecture using dbt and Snowflake. The approach is:
+
+- **Staging tables (`stg_*`)**: Raw data is cleaned and typed, preserving source granularity.
+- **Dimension tables (`dim_*`)**: Provide descriptive, slowly changing attributes for provinces and districts, enabling consistent joins and reporting.
+- **Fact tables (`fct_*`)**: Store event-level or aggregated weather measurements, optimized for analytics and reporting.
+- **Intermediate models (`int_*`)**: Used for business logic and aggregations before populating fact tables.
+
+**Key relationships:**
+- Each province can have multiple districts.
+- Weather data is linked to provinces (and optionally districts) via surrogate keys from dimension tables.
+- All relationships are enforced using foreign keys in the DBML and reflected in the ERD.
+
+This approach ensures data integrity, scalability, and clear lineage from raw sources to analytics-ready tables.
 ---
 
 ## Data Quality & Testing
@@ -93,10 +113,10 @@ This project is a complete machine learning and analytics pipeline for weather d
 
 ## Documentation
 
-- **dbt docs**:  
-  Build and serve with  
+- **dbt docs**:
+  Build and serve with
   `dbt docs generate && dbt docs serve --port 8081`
-- **Airflow UI**:  
+- **Airflow UI**:
   Monitor DAGs and tasks at `http://localhost:8080`
 
 ---
@@ -104,7 +124,7 @@ This project is a complete machine learning and analytics pipeline for weather d
 ## Maintenance
 
 - **Incremental loads**: dbt incremental models for efficient updates
-- **Full refresh**:  
+- **Full refresh**:
   `dbt run --full-refresh`
 - **Model retraining**: Update ML models as needed
 

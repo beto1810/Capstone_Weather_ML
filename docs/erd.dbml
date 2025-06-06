@@ -1,0 +1,65 @@
+Table stg_vietnam_provinces {
+  province_id int [pk]
+  province_name varchar
+  province_name_vn varchar
+  region  varchar
+  latitude float
+  longitude float
+  loaded_at timestamp
+}
+
+Table stg_vietnam_districts {
+  district_id int [pk]
+  province_id int [ref: > stg_vietnam_provinces.province_id]
+  district_name varchar
+  district_name_vn varchar
+  latitude float
+  longitude float
+  loaded_at timestamp
+}
+
+Table dim_vietnam_districts {
+  district_id int [pk, ref: > stg_vietnam_districts.district_id]
+  province_id int
+  district_name varchar
+  district_name_vn varchar
+  latitude float
+  longitude float
+}
+
+Table dim_vietnam_provinces {
+  province_id int [pk, ref: > stg_vietnam_provinces.province_id]
+  province_name varchar
+  province_name_vn varchar
+  latitude float
+  longitude float
+}
+
+Table stg_weather_data {
+  province_id varchar [pk, ref: > dim_vietnam_provinces.province_id]
+  weather_updated_at timestamp
+  temperature_celsius float
+  temperature_fahrenheit float
+  is_daytime boolean
+  weather_condition varchar
+  condition_icon_url varchar
+  condition_code int
+  wind_speed_mph float
+  wind_kph float
+  wind_direction_degrees int
+  wind_direction varchar
+  pressure_millibars float
+  pressure_inches float
+  precipitation_mm float
+  precipitation_inches float
+  humidity_percent int
+  cloud_cover_percent int
+  feels_like_celsius float
+  feels_like_fahrenheit float
+  visibility_km float
+  visibility_miles float
+  uv_index float
+  wind_gust_mph float
+  wind_gust_kph float
+  record_loaded_at timestamp
+}
