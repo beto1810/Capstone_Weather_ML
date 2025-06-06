@@ -35,7 +35,7 @@ jobs:
 
       - name: Create profiles.yml
         run: |
-          cat <<EOT >> ~/.dbt/profiles.yml
+          cat <<EOT > ~/.dbt/profiles.yml
           dbt_weather:
             outputs:
               ci:
