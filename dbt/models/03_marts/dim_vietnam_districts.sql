@@ -46,7 +46,8 @@ final as (
         deduplicated.latitude,
         deduplicated.longitude,
         deduplicated.created_at,
-        deduplicated.updated_at
+        deduplicated.updated_at,
+        deduplicated.row_num
     from deduplicated
     where deduplicated.row_num = 1
 )
