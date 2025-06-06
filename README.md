@@ -3,6 +3,14 @@
 ## Overview
 This project is a complete machine learning and analytics pipeline for weather data in Vietnam. It integrates real-time data ingestion, batch processing, data transformation, analytics, and prediction. The stack includes Apache Airflow for orchestration, Apache Kafka for streaming, dbt for data modeling, and supports ML model training and deployment.
 
+## 🌐 Data Sources
+
+Weather API: WeatherAPI
+
+Frequency: Hourly ingestion
+
+Coverage: All 63 provinces in Vietnam
+
 ---
 
 ## Features
@@ -74,6 +82,29 @@ This project is a complete machine learning and analytics pipeline for weather d
 
 ---
 
+
+## ML Models
+
+Model Type: Multi-output Random Forest Regressor + Classification for condition
+
+Targets:
+
+Temperature: avgtemp_c, maxtemp_c, mintemp_c
+
+Precipitation: totalprecip_mm, daily_will_it_rain, daily_chance_of_rain
+
+Humidity: avghumidity
+
+Wind: maxwind_kph, maxwind_mph
+
+Condition: condition (classification)
+
+Features: Lag values from the last 3 days
+
+Forecast Horizon: 3-day prediction
+
+## ERD
+
 ![ERD](docs/diagram.png)
 
 - For the editable schema, see the [DBML file](docs/erd.dbml) (compatible with [dbdiagram.io](https://dbdiagram.io)).
@@ -102,12 +133,6 @@ This approach ensures data integrity, scalability, and clear lineage from raw so
 - **dbt tests**: Not null, unique, relationships, accepted ranges
 - **Airflow monitoring**: Task success/failure, logs
 - **Model validation**: ML metrics and evaluation scripts
-
----
-
-## Model Storage
-
-- **Large model files** (e.g., `.pkl` > 100MB) are not tracked in git or LFS due to GitHub limits.
 
 ---
 
