@@ -47,7 +47,6 @@ jobs:
               type: snowflake
               account: $SNOWFLAKE_ACCOUNT
               user: $SNOWFLAKE_CI_USER
-              private_key: $SNOWFLAKE_CI_USER_PRIVATE_KEY
               role: $SNOWFLAKE_ROLE
               database: $SNOWFLAKE_DATABASE
               warehouse: $SNOWFLAKE_WAREHOUSE
