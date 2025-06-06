@@ -9,8 +9,5 @@ project_dir = .
 profiles_dir = ~/.dbt
 
 
-[sqlfluff:layout]
-indented_joins = true
-
 [sqlfluff:lint]
 exclude_paths = dbt/dbt_packages/*
