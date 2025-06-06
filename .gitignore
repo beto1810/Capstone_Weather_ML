@@ -113,3 +113,6 @@ rsa_key.*
 
 
 rsa_key_encrypted.p8
+
+
+rsa_key_encrypted.p8.pub

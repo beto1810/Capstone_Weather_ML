@@ -60,3 +60,5 @@ jobs:
 
       - name: Run dbt build
         run: dbt build --target ci
+
+#test
