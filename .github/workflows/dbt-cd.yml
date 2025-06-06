@@ -21,11 +21,6 @@ jobs:
           cd dbt
           dbt deps
 
-      - name: Setup dbt profile
-        run: |
-          mkdir -p ~/.dbt
-          cp ./dbt/profiles.yml ~/.dbt/
-
       - name: Deploy dbt models
         run: dbt build --target prod
         working-directory: ./dbt
