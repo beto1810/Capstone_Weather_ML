@@ -19,7 +19,7 @@ SELECT
 
 FROM {{ ref('stg_weather_data') }} AS w
 INNER JOIN
-    {{ ref('stg_vietnam_provinces') }} AS p
+    {{ ref('dim_vietnam_provinces') }} AS p
     ON w.province_name = p.province_name
 GROUP BY p.province_id, weather_date
 ORDER BY p.province_id
