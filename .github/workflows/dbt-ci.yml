@@ -39,7 +39,7 @@ jobs:
       - name: Set up dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cp .dbt/profiles.yml ~/.dbt/
+          cp .dbt/profiles-cicd.yml ~/.dbt/
         working-directory: dbt
 
       - name: Lint SQL files
