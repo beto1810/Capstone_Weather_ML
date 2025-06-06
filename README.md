@@ -124,9 +124,9 @@ graph TD
 Our data model follows a modern data warehouse architecture using dbt and Snowflake. The approach is:
 
 - **Staging tables (`stg_*`)**: Raw data is cleaned and typed, preserving source granularity.
+- **Intermediate models (`int_*`)**: Used for business logic and aggregations before populating fact tables.
 - **Dimension tables (`dim_*`)**: Provide descriptive, slowly changing attributes for provinces and districts, enabling consistent joins and reporting.
 - **Fact tables (`fct_*`)**: Store event-level or aggregated weather measurements, optimized for analytics and reporting.
-- **Intermediate models (`int_*`)**: Used for business logic and aggregations before populating fact tables.
 
 **Key relationships:**
 - Each province can have multiple districts.
