@@ -83,25 +83,36 @@ Coverage: All 63 provinces in Vietnam
 ---
 
 
-## ML Models
+## 🤖 ML Models
 
-Model Type: Multi-output Random Forest Regressor + Classification for condition
+### Overview
 
-Targets:
+This project uses a **multi-output machine learning approach** for short-term weather forecasting:
 
-Temperature: avgtemp_c, maxtemp_c, mintemp_c
+- **Model Types**:
+  - `MultiOutputRegressor` (Random Forest) → for continuous weather metrics
+  - `RandomForestClassifier` → for categorical `condition` prediction
+- **Targets**:
+  - **Temperature**: `avgtemp_c`, `maxtemp_c`, `mintemp_c`
+  - **Precipitation**: `totalprecip_mm`, `daily_will_it_rain`, `daily_chance_of_rain`
+  - **Humidity**: `avghumidity`
+  - **Wind**: `maxwind_kph`, `maxwind_mph`
+  - **Condition**: `condition` (weather description)
+- **Features**: Lag features from the previous 3 days
+- **Forecast Horizon**: 3-day prediction window
 
-Precipitation: totalprecip_mm, daily_will_it_rain, daily_chance_of_rain
+---
 
-Humidity: avghumidity
+### 🔁 Build & Deploy Pipeline
 
-Wind: maxwind_kph, maxwind_mph
+1. **Train Locally**
+   Train the model in local using historical weather data export from snowflake
 
-Condition: condition (classification)
+2. **Upload to Snowflake Stage**
 
-Features: Lag values from the last 3 days
+3. **Create UDF / Stored Procedure**
 
-Forecast Horizon: 3-day prediction
+4. **Use in DBT Model**
 
 ## ERD
 
