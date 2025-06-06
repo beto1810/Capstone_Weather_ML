@@ -11,3 +11,4 @@ kafka-python
 pandas
 sqlfluff
 python-dotenv 
+sqlfluff-templater-dbt

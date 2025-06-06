@@ -1,0 +1,22 @@
+name: dbt CD
+on:
+  release:
+    types: [created]
+
+jobs:
+  dbt-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Install dbt
+        run: |
+          pip install -r requirements.txt
+          dbt deps
+      
+      - name: Deploy dbt models
+        run: dbt build --target prod

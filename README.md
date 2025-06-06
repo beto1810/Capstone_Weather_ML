@@ -28,8 +28,8 @@ This project is a complete machine learning and analytics pipeline for weather d
 │   ├── models/
 │   │   ├── 01_staging/        # Staging models (raw to clean)
 │   │   ├── 02_int/            # Intermediate models (feature engineering)
-│   │   ├── 03_marts/          # Fact and dimension models (analytics)
-│   │   └── 04_predict/        # Prediction models (ML outputs)
+│   │   ├── 03_marts/          # Fact and dimension models (analytics) & Prediction models (ML outputs)
+│   │  
 │   ├── macros/                # Custom dbt macros
 │   ├── tests/                 # Custom dbt tests
 │   ├── seeds/                 # Static reference data

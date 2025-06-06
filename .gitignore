@@ -106,3 +106,5 @@ crawling_weather/**/*
 
 training_weather_model/*
 !training_weather_model/*.zip
+
+rsa_key.*

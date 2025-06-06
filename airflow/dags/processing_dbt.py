@@ -3,7 +3,7 @@ from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
 
 @dag(
-    schedule_interval='5 16 * * *',
+    schedule_interval='15 16 * * *',
     start_date=datetime(2023, 10, 1),
     catchup=False,
     default_args={
