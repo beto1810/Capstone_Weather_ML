@@ -10,7 +10,7 @@
         FROM {{ this }}
     ),
 {% else %}
-  WITH
+    WITH
 {% endif %}
 
 weather_by_region AS (
