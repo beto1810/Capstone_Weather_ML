@@ -1,4 +1,4 @@
-dbt:
+dbt_weather:
   outputs:
     ci: # see https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup#key-pair-authentication
       type: snowflake
