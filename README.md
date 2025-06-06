@@ -99,7 +99,7 @@ This project uses a **multi-output machine learning approach** for short-term we
   - **Wind**: `maxwind_kph`, `maxwind_mph`
   - **Condition**: `condition` (weather description)
 - **Features**: Lag features from the previous 3 days
-- **Forecast Horizon**: 3-day prediction window
+- **Forecast Horizon**: 2-day prediction window
 
 ---
 
