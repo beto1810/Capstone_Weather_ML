@@ -1,7 +1,7 @@
-{{ 
-    config( materialized='incremental', 
-    unique_key=['district_id'], 
-    incremental_strategy='merge', 
+{{
+    config( materialized='incremental',
+    unique_key=['district_id'],
+    incremental_strategy='merge',
     merge_update_columns=['province_id','district_name', 'district_name_vn', 'latitude', 'longitude', 'updated_at'] ) }}
 
 with transformed as (
@@ -34,7 +34,7 @@ deduplicated as (
 )
 
 {% if is_incremental() %}
-    -- Only process new or changed records 
+    -- Only process new or changed records
     select distinct
         deduplicated.district_id,
         deduplicated.province_id,
@@ -49,12 +49,12 @@ deduplicated as (
         {{ this }} as existing
         on deduplicated.district_id = existing.district_id
     where
-        existing.district_id is null -- New records 
+        existing.district_id is null -- New records
         or deduplicated.province_id != existing.province_id
         or deduplicated.district_name != existing.district_name
         or deduplicated.district_name_vn != existing.district_name_vn
         or deduplicated.latitude != existing.latitude
         or deduplicated.longitude != existing.longitude
-{% else %} -- First run - process all records 
-    select * from deduplicated 
+{% else %}
+    select * from deduplicated
 {% endif %}

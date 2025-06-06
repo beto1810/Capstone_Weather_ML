@@ -1,6 +1,3 @@
-
-
-
 SELECT
     p.province_id,
     DATE(w.weather_updated_at) AS weather_date,
