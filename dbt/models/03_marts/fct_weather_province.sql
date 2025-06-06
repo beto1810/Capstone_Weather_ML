@@ -31,7 +31,7 @@ SELECT
     e.avg_wind_mph,
     e.region,
 
-    PREDICT_CONDITION(
+    KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_CONDITION(
         e.avg_temperature,
         e.max_temperature,
         e.min_temperature,
