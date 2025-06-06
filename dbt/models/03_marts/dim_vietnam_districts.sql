@@ -73,6 +73,4 @@ final as (
         or final.district_name_vn != existing.district_name_vn
         or final.latitude != existing.latitude
         or final.longitude != existing.longitude
-{% else %}
-    select * from final
 {% endif %}
