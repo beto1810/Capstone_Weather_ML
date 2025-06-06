@@ -14,11 +14,12 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dbt
+      - name: Install dbt and dependencies
         run: |
           pip install -r requirements.txt
+          # Only run dbt deps inside dbt folder
+          cd dbt
           dbt deps
-        working-directory: ./dbt
 
       - name: Deploy dbt models
         run: dbt build --target prod
