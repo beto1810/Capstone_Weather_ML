@@ -34,7 +34,9 @@ jobs:
         run: |
           pip install dbt-core dbt-snowflake sqlfluff
           pip install sqlfluff-templater-dbt
-          dbt deps
+
+      - name: Install dbt packages
+        run: dbt deps
 
       - name: Set up dbt profiles.yml
         run: |
