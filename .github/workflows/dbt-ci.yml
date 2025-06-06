@@ -42,7 +42,8 @@ jobs:
                 type: snowflake
                 account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
                 user: ${{ secrets.SNOWFLAKE_CI_USER }}
-                private_key: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
+                private_key: |
+                  ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
                 role: USER_DBT_ROLE
                 warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
                 database: ${{ secrets.SNOWFLAKE_DATABASE }}
