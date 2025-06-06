@@ -114,6 +114,8 @@ This project uses a **multi-output machine learning approach** for short-term we
 
 4. **Use in DBT Model**
 
+---
+
 ## ERD
 
 ![ERD](docs/diagram.png)
