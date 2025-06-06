@@ -111,6 +111,32 @@ Forecast Horizon: 3-day prediction
 
 ---
 
+┌────────────────────┐
+│  stg_weather_data  │   ← Staging layer (raw weather data cleaned)
+└────────┬───────────┘
+         │
+         ▼
+┌────────────────────┐
+│  int_weather_data  │   ← Intermediate layer (with transformations, joins, derived columns)
+└────────┬───────────┘
+         │
+         ├───────────────┐
+         │               │
+         ▼               ▼
+┌────────────────────┐  ┌────────────────────┐
+│ fct_weather_region │  │ fct_weather_province│ ← Fact layer (aggregations by region/province)
+└────────┬───────────┘  └────────┬────────────┘
+         │                       │
+         ▼                       ▼
+     (join, enrich)         (join, enrich)
+         │                       │
+         └────────────┬──────────┘
+                      ▼
+         ┌─────────────────────────────┐
+         │ predicted_weather_province  │ ← Model prediction output
+         └─────────────────────────────┘
+
+
 ## Data Modeling Approach
 
 Our data model follows a modern data warehouse architecture using dbt and Snowflake. The approach is:
