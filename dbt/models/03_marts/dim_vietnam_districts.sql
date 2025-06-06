@@ -33,7 +33,7 @@ deduplicated as (
         row_number() over (
             partition by district_id
             order by updated_at desc
-        ) as row_num
+        ) as rank_num
     from transformed
 ),
 
@@ -47,9 +47,9 @@ final as (
         deduplicated.longitude,
         deduplicated.created_at,
         deduplicated.updated_at,
-        deduplicated.row_num
+        deduplicated.rank_num
     from deduplicated
-    where deduplicated.row_num = 1
+    where deduplicated.rank_num = 1
 )
 
 {% if is_incremental() %}
