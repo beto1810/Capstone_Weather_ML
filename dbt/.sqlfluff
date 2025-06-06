@@ -1,0 +1,10 @@
+[sqlfluff]
+dialect = snowflake
+templater = dbt
+exclude_rules = L009,L031,LT05
+nocolor = False
+
+[sqlfluff:templater:dbt]
+project_dir = .
+profiles_dir = ~/.dbt
+

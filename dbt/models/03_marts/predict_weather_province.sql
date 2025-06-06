@@ -1,144 +1,289 @@
--- models/fct_forecast_next_day_weather.sql
-
-
 WITH base AS (
     SELECT
         fct.province_id,
         dim.region,
         fct.weather_date,
-         ROW_NUMBER() OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date DESC) AS row_num,
+        ROW_NUMBER()
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date DESC
+            )
+            AS row_num,
 
-        lag(avg_temperature, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS AVGTEMP1,
-        lag(avg_temperature, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS AVGTEMP2,
-        lag(avg_temperature, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS AVGTEMP3,
+        LAG(fct.avg_temperature, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS avgtemp1,
+        LAG(fct.avg_temperature, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS avgtemp2,
+        LAG(fct.avg_temperature, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS avgtemp3,
 
-        lag(max_temperature, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS MAXTEMP1,
-        lag(max_temperature, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS MAXTEMP2,
-        lag(max_temperature, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS MAXTEMP3,
+        LAG(fct.max_temperature, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS maxtemp1,
+        LAG(fct.max_temperature, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS maxtemp2,
+        LAG(fct.max_temperature, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS maxtemp3,
 
-        lag(min_temperature, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS MINTEMP1,
-        lag(min_temperature, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS MINTEMP2,
-        lag(min_temperature, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS MINTEMP3,
+        LAG(fct.min_temperature, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS mintemp1,
+        LAG(fct.min_temperature, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS mintemp2,
+        LAG(fct.min_temperature, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS mintemp3,
 
-        lag(sum_precipitation, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS PRECIP1,
-        lag(sum_precipitation, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS PRECIP2,
-        lag(sum_precipitation, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS PRECIP3,
+        LAG(fct.sum_precipitation, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS precip1,
+        LAG(fct.sum_precipitation, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS precip2,
+        LAG(fct.sum_precipitation, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS precip3,
 
-        lag(chance_rain, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS RAINCHANCE1,
-        lag(chance_rain, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS RAINCHANCE2,
-        lag(chance_rain, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS RAINCHANCE3,
+        LAG(fct.chance_rain, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS rainchance1,
+        LAG(fct.chance_rain, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS rainchance2,
+        LAG(fct.chance_rain, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS rainchance3,
 
-        lag(avg_humidity, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS HUMIDITY1,
-        lag(avg_humidity, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS HUMIDITY2,
-        lag(avg_humidity, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS HUMIDITY3,
+        LAG(fct.avg_humidity, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS humidity1,
+        LAG(fct.avg_humidity, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS humidity2,
+        LAG(fct.avg_humidity, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS humidity3,
 
-        lag(avg_wind_kph, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS WINDKPH1,
-        lag(avg_wind_kph, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS WINDKPH2,
-        lag(avg_wind_kph, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS WINDKPH3,
+        LAG(fct.avg_wind_kph, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS windkph1,
+        LAG(fct.avg_wind_kph, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS windkph2,
+        LAG(fct.avg_wind_kph, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS windkph3,
 
-        lag(avg_wind_mph, 1) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS WINDMPH1,
-        lag(avg_wind_mph, 2) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS WINDMPH2,
-        lag(avg_wind_mph, 3) OVER (PARTITION BY fct.province_id ORDER BY fct.weather_date) AS WINDMPH3
+        LAG(fct.avg_wind_mph, 1)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS windmph1,
+        LAG(fct.avg_wind_mph, 2)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS windmph2,
+        LAG(fct.avg_wind_mph, 3)
+            OVER (
+                PARTITION BY fct.province_id
+                ORDER BY fct.weather_date
+            )
+            AS windmph3
 
-    FROM {{ ref('fct_weather_province') }} fct
-    JOIN {{ ref('dim_vietnam_provinces') }} dim ON fct.province_id = dim.province_id
+    FROM {{ ref('fct_weather_province') }} AS fct
+    INNER JOIN
+        {{ ref('dim_vietnam_provinces') }} AS dim
+        ON fct.province_id = dim.province_id
 ),
+
 day_1 AS (
     SELECT
-        province_id,
-        region,
-        weather_date,
+        base.province_id,
+        base.region,
+        base.weather_date,
         PREDICT_ALL_WEATHER_METRICS(
-            AVGTEMP1, AVGTEMP2, AVGTEMP3,
-            MAXTEMP1, MAXTEMP2, MAXTEMP3,
-            MINTEMP1, MINTEMP2, MINTEMP3,
-            PRECIP1, PRECIP2, PRECIP3,
-            RAINCHANCE1, RAINCHANCE2, RAINCHANCE3,
-            HUMIDITY1, HUMIDITY2, HUMIDITY3,
-            WINDKPH1, WINDKPH2, WINDKPH3,
-            WINDMPH1, WINDMPH2, WINDMPH3,
-            region
+            base.avgtemp1, base.avgtemp2, base.avgtemp3,
+            base.maxtemp1, base.maxtemp2, base.maxtemp3,
+            base.mintemp1, base.mintemp2, base.mintemp3,
+            base.precip1, base.precip2, base.precip3,
+            base.rainchance1, base.rainchance2, base.rainchance3,
+            base.humidity1, base.humidity2, base.humidity3,
+            base.windkph1, base.windkph2, base.windkph3,
+            base.windmph1, base.windmph2, base.windmph3,
+            base.region
         ) AS forecast_json
     FROM base
-    WHERE row_num = 1
+    WHERE base.row_num = 1
 ),
+
 predict_day_1 AS (
-SELECT
-    province_id,
-    DATEADD(day, 1, weather_date) AS forecast_date,
-    CAST(PARSE_JSON(forecast_json):avgtemp_c AS FLOAT) AS forecast_avg_temperature,
-    CAST(PARSE_JSON(forecast_json):maxtemp_c AS FLOAT) AS forecast_max_temperature,
-    CAST(PARSE_JSON(forecast_json):mintemp_c AS FLOAT) AS forecast_min_temperature,
-    CAST(PARSE_JSON(forecast_json):totalprecip_mm AS FLOAT) AS forecast_precipitation,
-    CAST(PARSE_JSON(forecast_json):daily_chance_of_rain AS FLOAT) AS forecast_chance_rain,
-    CAST(PARSE_JSON(forecast_json):avghumidity AS FLOAT) AS forecast_humidity,
-    CAST(PARSE_JSON(forecast_json):maxwind_kph AS FLOAT) AS forecast_wind_kph,
-    CAST(PARSE_JSON(forecast_json):maxwind_mph AS FLOAT) AS forecast_wind_mph,
-    PREDICT_CONDITION(
-        CAST(PARSE_JSON(forecast_json):avgtemp_c AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):maxtemp_c AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):mintemp_c AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):totalprecip_mm AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):daily_chance_of_rain AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):avghumidity AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):maxwind_kph AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):maxwind_mph AS FLOAT),
-        region
-    ) AS forecast_condition,
-    CURRENT_TIMESTAMP() AS created_at,
-    CURRENT_TIMESTAMP() AS updated_at
-FROM day_1
+    SELECT
+        day_1.province_id,
+        DATEADD(DAY, 1, day_1.weather_date) AS forecast_date,
+        CAST(PARSE_JSON(day_1.forecast_json):avgtemp_c AS FLOAT)
+            AS forecast_avg_temperature,
+        CAST(PARSE_JSON(day_1.forecast_json):maxtemp_c AS FLOAT)
+            AS forecast_max_temperature,
+        CAST(PARSE_JSON(day_1.forecast_json):mintemp_c AS FLOAT)
+            AS forecast_min_temperature,
+        CAST(PARSE_JSON(day_1.forecast_json):totalprecip_mm AS FLOAT)
+            AS forecast_precipitation,
+        CAST(PARSE_JSON(day_1.forecast_json):daily_chance_of_rain AS FLOAT)
+            AS forecast_chance_rain,
+        CAST(PARSE_JSON(day_1.forecast_json):avghumidity AS FLOAT)
+            AS forecast_humidity,
+        CAST(PARSE_JSON(day_1.forecast_json):maxwind_kph AS FLOAT)
+            AS forecast_wind_kph,
+        CAST(PARSE_JSON(day_1.forecast_json):maxwind_mph AS FLOAT)
+            AS forecast_wind_mph,
+        PREDICT_CONDITION(
+            CAST(PARSE_JSON(day_1.forecast_json):avgtemp_c AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):maxtemp_c AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):mintemp_c AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):totalprecip_mm AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):daily_chance_of_rain AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):avghumidity AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):maxwind_kph AS FLOAT),
+            CAST(PARSE_JSON(day_1.forecast_json):maxwind_mph AS FLOAT),
+            day_1.region
+        ) AS forecast_condition,
+        CURRENT_TIMESTAMP() AS created_at,
+        CURRENT_TIMESTAMP() AS updated_at
+    FROM day_1
 ),
+
 day_2 AS (
     SELECT
         predict_day_1.province_id,
-        DATEADD(day, 2, weather_date) AS forecast_date,
+        DATEADD(DAY, 2, base.weather_date) AS forecast_date,
         PREDICT_ALL_WEATHER_METRICS(
-            AVGTEMP2, AVGTEMP3, forecast_avg_temperature,
-            MAXTEMP2, MAXTEMP3, forecast_max_temperature,
-            MINTEMP2, MINTEMP3, forecast_min_temperature,
-            PRECIP2, PRECIP3, forecast_precipitation,
-            RAINCHANCE2, RAINCHANCE3, forecast_chance_rain,
-            HUMIDITY2, HUMIDITY3, forecast_humidity,
-            WINDKPH2, WINDKPH3, forecast_wind_kph,
-            WINDMPH2, WINDMPH3, forecast_wind_mph,
-            region
+            predict_day_1.avgtemp2, predict_day_1.avgtemp3, predict_day_1.forecast_avg_temperature,
+            predict_day_1.maxtemp2, predict_day_1.maxtemp3, predict_day_1.forecast_max_temperature,
+            predict_day_1.mintemp2, predict_day_1.mintemp3, predict_day_1.forecast_min_temperature,
+            predict_day_1.precip2, predict_day_1.precip3, predict_day_1.forecast_precipitation,
+            predict_day_1.rainchance2, predict_day_1.rainchance3, predict_day_1.forecast_chance_rain,
+            predict_day_1.humidity2, predict_day_1.humidity3, predict_day_1.forecast_humidity,
+            predict_day_1.windkph2, predict_day_1.windkph3, predict_day_1.forecast_wind_kph,
+            predict_day_1.windmph2, predict_day_1.windmph3, predict_day_1.forecast_wind_mph,
+            predict_day_1.region
         ) AS forecast_json
     FROM base
-    join predict_day_1 on base.province_id = predict_day_1.province_id 
-    WHERE row_num = 1    
+    INNER JOIN predict_day_1 ON base.province_id = predict_day_1.province_id
+    WHERE base.row_num = 1
 ),
+
 predict_day_2 AS (
-SELECT
-    day_2.province_id,
-    forecast_date,
-    CAST(PARSE_JSON(forecast_json):avgtemp_c AS FLOAT) AS forecast_avg_temperature,
-    CAST(PARSE_JSON(forecast_json):maxtemp_c AS FLOAT) AS forecast_max_temperature,
-    CAST(PARSE_JSON(forecast_json):mintemp_c AS FLOAT) AS forecast_min_temperature,
-    CAST(PARSE_JSON(forecast_json):totalprecip_mm AS FLOAT) AS forecast_precipitation,
-    CAST(PARSE_JSON(forecast_json):daily_chance_of_rain AS FLOAT) AS forecast_chance_rain,
-    CAST(PARSE_JSON(forecast_json):avghumidity AS FLOAT) AS forecast_humidity,
-    CAST(PARSE_JSON(forecast_json):maxwind_kph AS FLOAT) AS forecast_wind_kph,
-    CAST(PARSE_JSON(forecast_json):maxwind_mph AS FLOAT) AS forecast_wind_mph,
-    PREDICT_CONDITION(
-        CAST(PARSE_JSON(forecast_json):avgtemp_c AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):maxtemp_c AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):mintemp_c AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):totalprecip_mm AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):daily_chance_of_rain AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):avghumidity AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):maxwind_kph AS FLOAT),
-        CAST(PARSE_JSON(forecast_json):maxwind_mph AS FLOAT),
-        region
-    ) AS forecast_condition,
-    CURRENT_TIMESTAMP() AS created_at,
-    CURRENT_TIMESTAMP() AS updated_at
-FROM day_2
-join base on day_2.province_id = base.province_id
-WHERE row_num = 1
+    SELECT
+        day_2.province_id,
+        day_2.forecast_date,
+        CAST(PARSE_JSON(day_2.forecast_json):avgtemp_c AS FLOAT)
+            AS forecast_avg_temperature,
+        CAST(PARSE_JSON(day_2.forecast_json):maxtemp_c AS FLOAT)
+            AS forecast_max_temperature,
+        CAST(PARSE_JSON(day_2.forecast_json):mintemp_c AS FLOAT)
+            AS forecast_min_temperature,
+        CAST(PARSE_JSON(day_2.forecast_json):totalprecip_mm AS FLOAT)
+            AS forecast_precipitation,
+        CAST(PARSE_JSON(day_2.forecast_json):daily_chance_of_rain AS FLOAT)
+            AS forecast_chance_rain,
+        CAST(PARSE_JSON(day_2.forecast_json):avghumidity AS FLOAT)
+            AS forecast_humidity,
+        CAST(PARSE_JSON(day_2.forecast_json):maxwind_kph AS FLOAT)
+            AS forecast_wind_kph,
+        CAST(PARSE_JSON(day_2.forecast_json):maxwind_mph AS FLOAT)
+            AS forecast_wind_mph,
+        PREDICT_CONDITION(
+            CAST(PARSE_JSON(day_2.forecast_json):avgtemp_c AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):maxtemp_c AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):mintemp_c AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):totalprecip_mm AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):daily_chance_of_rain AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):avghumidity AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):maxwind_kph AS FLOAT),
+            CAST(PARSE_JSON(day_2.forecast_json):maxwind_mph AS FLOAT),
+            base.region
+        ) AS forecast_condition,
+        CURRENT_TIMESTAMP() AS created_at,
+        CURRENT_TIMESTAMP() AS updated_at
+    FROM day_2
+    INNER JOIN base ON day_2.province_id = base.province_id
+    WHERE base.row_num = 1
 )
-select * from predict_day_1
+
+SELECT * FROM predict_day_1
 UNION ALL
-select * from predict_day_2
-order by province_id
+SELECT * FROM predict_day_2
+ORDER BY province_id
 
