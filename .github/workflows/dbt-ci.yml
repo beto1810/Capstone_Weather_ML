@@ -36,9 +36,14 @@ jobs:
           pip install sqlfluff-templater-dbt
           dbt deps
 
-      - name: Lint SQL files
-        run: sqlfluff lint . --dialect snowflake --templater dbt --dbt-profile-dir .dbt
+      - name: Set up dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cp .dbt/profiles.yml ~/.dbt/
         working-directory: dbt
+
+      - name: Lint SQL files
+        run: sqlfluff lint . --dialect snowflake
 
       - name: Run dbt build
         run: dbt build --target ci
