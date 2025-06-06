@@ -111,31 +111,12 @@ Forecast Horizon: 3-day prediction
 
 ---
 
-┌────────────────────┐
-│  stg_weather_data  │   ← Staging layer (raw weather data cleaned)
-└────────┬───────────┘
-         │
-         ▼
-┌────────────────────┐
-│  int_weather_data  │   ← Intermediate layer (with transformations, joins, derived columns)
-└────────┬───────────┘
-         │
-         ├───────────────┐
-         │               │
-         ▼               ▼
-┌────────────────────┐  ┌────────────────────┐
-│ fct_weather_region │  │ fct_weather_province│ ← Fact layer (aggregations by region/province)
-└────────┬───────────┘  └────────┬────────────┘
-         │                       │
-         ▼                       ▼
-     (join, enrich)         (join, enrich)
-         │                       │
-         └────────────┬──────────┘
-                      ▼
-         ┌─────────────────────────────┐
-         │ predicted_weather_province  │ ← Model prediction output
-         └─────────────────────────────┘
-
+graph TD
+    A[stg_weather_data] --> B[int_weather_data]
+    B --> C[fct_weather_province]
+    B --> D[fct_weather_region]
+    C --> E[predicted_weather_province]
+    D --> E[predicted_weather_province]
 
 ## Data Modeling Approach
 
