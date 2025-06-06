@@ -10,7 +10,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: dbt
+        working-directory: dbt  # adjust if your dbt project is elsewhere
 
     env:
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -36,10 +36,28 @@ jobs:
           pip install sqlfluff-templater-dbt
           dbt deps
 
-
-
-      - name: Lint SQL files
-        run: sqlfluff lint . --dialect snowflake
+      - name: Set up dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+        dbt_weather:
+          target: ci
+          outputs:
+            ci:
+              type: snowflake
+              account: $SNOWFLAKE_ACCOUNT
+              user: $SNOWFLAKE_CI_USER
+              private_key: |
+        $(echo "$SNOWFLAKE_CI_USER_PRIVATE_KEY" | sed 's/^/        /')
+              role: $SNOWFLAKE_ROLE
+              database: $SNOWFLAKE_DATABASE
+              warehouse: $SNOWFLAKE_WAREHOUSE
+              schema: $SNOWFLAKE_SCHEMA
+              threads: 4
+              client_session_keep_alive: false
+        EOF
+      - name: Lint SQL files with sqlfluff
+        run: sqlfluff lint models --dialect snowflake
 
       - name: Run dbt build
         run: dbt build --target ci
