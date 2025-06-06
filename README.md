@@ -111,8 +111,6 @@ Forecast Horizon: 3-day prediction
 
 ---
 
-<details>
-<summary>Click to view Mermaid schema</summary>
 
 ```mermaid
 graph TD
@@ -121,7 +119,7 @@ graph TD
     B --> D[fct_weather_region]
     C --> E[predicted_weather_province]
     D --> E[predicted_weather_province]
-
+```
 ## Data Modeling Approach
 
 Our data model follows a modern data warehouse architecture using dbt and Snowflake. The approach is:
