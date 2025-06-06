@@ -32,6 +32,7 @@ deduplicated as (
         from transformed
     )
 ),
+
 final as (
     select *
     from deduplicated
