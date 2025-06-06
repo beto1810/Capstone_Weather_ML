@@ -111,6 +111,10 @@ Forecast Horizon: 3-day prediction
 
 ---
 
+<details>
+<summary>Click to view Mermaid schema</summary>
+
+```mermaid
 graph TD
     A[stg_weather_data] --> B[int_weather_data]
     B --> C[fct_weather_province]
