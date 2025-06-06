@@ -229,15 +229,15 @@ day_2 AS (
         predict_day_1.province_id,
         DATEADD(DAY, 2, base.weather_date) AS forecast_date,
         PREDICT_ALL_WEATHER_METRICS(
-            predict_day_1.avgtemp2, predict_day_1.avgtemp3, predict_day_1.forecast_avg_temperature,
-            predict_day_1.maxtemp2, predict_day_1.maxtemp3, predict_day_1.forecast_max_temperature,
-            predict_day_1.mintemp2, predict_day_1.mintemp3, predict_day_1.forecast_min_temperature,
-            predict_day_1.precip2, predict_day_1.precip3, predict_day_1.forecast_precipitation,
-            predict_day_1.rainchance2, predict_day_1.rainchance3, predict_day_1.forecast_chance_rain,
-            predict_day_1.humidity2, predict_day_1.humidity3, predict_day_1.forecast_humidity,
-            predict_day_1.windkph2, predict_day_1.windkph3, predict_day_1.forecast_wind_kph,
-            predict_day_1.windmph2, predict_day_1.windmph3, predict_day_1.forecast_wind_mph,
-            predict_day_1.region
+            base.avgtemp2, base.avgtemp3, predict_day_1.forecast_avg_temperature,
+            base.maxtemp2, base.maxtemp3, predict_day_1.forecast_max_temperature,
+            base.mintemp2, base.mintemp3, predict_day_1.forecast_min_temperature,
+            base.precip2, base.precip3, predict_day_1.forecast_precipitation,
+            base.rainchance2, base.rainchance3, predict_day_1.forecast_chance_rain,
+            base.humidity2, base.humidity3, predict_day_1.forecast_humidity,
+            base.windkph2, base.windkph3, predict_day_1.forecast_wind_kph,
+            base.windmph2, base.windmph3, predict_day_1.forecast_wind_mph,
+            base.region
         ) AS forecast_json
     FROM base
     INNER JOIN predict_day_1 ON base.province_id = predict_day_1.province_id
