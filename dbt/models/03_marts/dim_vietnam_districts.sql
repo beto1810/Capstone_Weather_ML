@@ -38,7 +38,15 @@ deduplicated as (
 ),
 
 final as (
-    select *
+    select
+        deduplicated.district_id,
+        deduplicated.province_id,
+        deduplicated.district_name,
+        deduplicated.district_name_vn,
+        deduplicated.latitude,
+        deduplicated.longitude,
+        deduplicated.created_at,
+        deduplicated.updated_at
     from deduplicated
     where deduplicated.row_num = 1
 )
