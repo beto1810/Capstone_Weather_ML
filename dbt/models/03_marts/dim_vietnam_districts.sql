@@ -22,7 +22,14 @@ with transformed as (
 
 deduplicated as (
     select
-        *,
+        district_id,
+        province_id,
+        district_name,
+        district_name_vn,
+        latitude,
+        longitude,
+        created_at,
+        updated_at,
         row_number() over (
             partition by district_id
             order by updated_at desc
@@ -33,7 +40,7 @@ deduplicated as (
 final as (
     select *
     from deduplicated
-    where row_num = 1
+    where deduplicated.row_num = 1
 )
 
 {% if is_incremental() %}
