@@ -1,7 +1,7 @@
 import requests
 import json
 import time
-import os 
+import os
 from dotenv import load_dotenv
 from pathlib import Path
 from kafka import KafkaProducer
@@ -15,7 +15,7 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-    
+
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
 
 API_KEY = os.getenv('WEATHER_API_KEY')
@@ -31,26 +31,37 @@ def get_cities_from_snowflake():
             account=os.getenv('SNOWFLAKE_ACCOUNT'),
             warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
             database=os.getenv('SNOWFLAKE_DATABASE'),
-            schema=os.getenv('SNOWFLAKE_SCHEME_ANALYSIS')
+            schema="WEATHER_ANALYTICS",
+            role = "USER_DBT_ROLE"  # Ensure this role has access to the required tables
         )
-        
+
         cursor = conn.cursor()
-        
+
+        print(user := os.getenv('SNOWFLAKE_USER'))
+        print(account := os.getenv('SNOWFLAKE_ACCOUNT'))
+        print(warehouse := os.getenv('SNOWFLAKE_WAREHOUSE'))
+        print(database := os.getenv('SNOWFLAKE_DATABASE'))
+        print(schema := os.getenv('SNOWFLAKE_SCHEME_ANALYSIS'))
+        print(role := "USER_DBT_ROLE")
+        logger.info(f"Connecting to Snowflake as user {user} on account {account}")
+
+        print("connected to Snowflake successfully")
+
         # Fetch cities data
         query = """
-        SELECT province_name, latitude, longitude 
-        FROM dim_vietnam_provinces 
+        SELECT province_name, latitude, longitude
+        FROM dim_vietnam_provinces
         """
-        
+
         cursor.execute(query)
         cities_df = pd.DataFrame(
-            cursor.fetchall(), 
+            cursor.fetchall(),
             columns=['province_name', 'latitude', 'longitude']
         )
-        
+
         logger.info(f"Loaded {len(cities_df['province_name'])} cities from Snowflake")
         return cities_df
-        
+
     except Exception as e:
         logger.error(f"Failed to fetch cities from Snowflake: {str(e)}")
         raise
@@ -63,7 +74,7 @@ def fetch_data_from_api(latitude, longitude):
     API_KEY = os.getenv('WEATHER_API_KEY')
     if not API_KEY:
         raise ValueError("API key not found. Please set the WEATHER_API_KEY environment variable.")
-    
+
     weather_url = f"https://api.weatherapi.com/v1/current.json?key={API_KEY}&q={latitude},{longitude}&aqi=no"
     response = requests.get(weather_url)
     response.raise_for_status()
@@ -89,21 +100,21 @@ def produce_messages(cities_df,max_retries=3, timeout=10):
                     data = fetch_data_from_api(lat, lon)
                     data_weather = data['current']
                     data_weather['province_name'] = province
-                    
+
                     logger.info(f"Sending data for {data_weather['province_name']}...")
-                    
+
                     # Send with increased timeout
                     future = producer.send('data-weather', data_weather)
                     record_metadata = future.get(timeout=timeout)
-                    
+
                     logger.info(f"Successfully sent data for {data_weather['province_name']} "
                                 f"to partition {record_metadata.partition} "
                                 f"at offset {record_metadata.offset}")
-                    
+
                     messages_processed += 1
                     break  # Success, exit retry loop
-        
-    
+
+
                 except requests.exceptions.RequestException as e:
                     logger.error(f"API error for {province}: {str(e)}")
                     break  # Don't retry API errors
@@ -116,12 +127,12 @@ def produce_messages(cities_df,max_retries=3, timeout=10):
                     else:
                         logger.info(f"Retrying... ({retries}/{max_retries})")
                         time.sleep(1)  # Wait before retry
-            
+
             time.sleep(0.3)  # Wait between cities
 
         logger.info("Finished processing all cities.")
         return messages_processed
-     
+
     except KeyboardInterrupt:
         logger.info("Producer stopped by user")
     except Exception as e:
@@ -132,7 +143,7 @@ def produce_messages(cities_df,max_retries=3, timeout=10):
         producer.close()
         logger.info("Producer closed")
 
-        
+
 
 # def send_to_dlq(producer, data, error_msg):
 #     """Send failed messages to DLQ with error context"""
@@ -159,4 +170,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Failed to produce messages: {str(e)}")
         exit(1)
-    
+

@@ -10,6 +10,14 @@ from airflow.decorators import dag, task
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from airflow.operators.bash import BashOperator
 
+from airflow.decorators import task
+import snowflake.connector
+import logging
+import os
+import pandas as pd
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -21,20 +29,45 @@ load_dotenv()
 
 @task
 def get_snowflake_hook():
-
-    hook = SnowflakeHook(snowflake_conn_id='snowflake_default')
     try:
-        # Attempt to get a connection to test it
-        conn = hook.get_conn()
+        # Load PEM private key and convert to DER bytes
+        private_key_path = "/opt/airflow/keys/rsa_key.p8"  # 🔁 Thay bằng đường dẫn thực tế
+        with open(private_key_path, "rb") as key_file:
+            p_key = serialization.load_pem_private_key(
+                key_file.read(),
+                password=None,  # hoặc b"your_password" nếu key được mã hóa
+                backend=default_backend()
+            )
+        pkb = p_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+
+        # Thiết lập kết nối Snowflake
+        conn = snowflake.connector.connect(
+            user="DATNGUYEN1810",
+            account="ZFLRNBO-YT37108",
+            private_key=pkb,
+            warehouse="DBT_WH",
+            database="KAFKA_AIRFLOW_WEATHER",
+            schema="PUBLIC",
+            role="USER_DBT_ROLE"
+        )
+
+        # Truy vấn test
         cursor = conn.cursor()
-        cursor.execute("SELECT CURRENT_VERSION()")  # Simple test query
+        cursor.execute("SELECT CURRENT_VERSION()")
         version = cursor.fetchone()
         logging.info(f"✅ Successfully connected to Snowflake. Version: {version[0]}")
-        result = hook.get_pandas_df("SELECT CURRENT_VERSION()")
+
+        # Truy vấn trả kết quả dưới dạng pandas dataframe
+        df = pd.read_sql("SELECT CURRENT_VERSION()", conn)
+        return df.to_dict()
+
     except Exception as e:
         logging.error("❌ Failed to connect to Snowflake", exc_info=True)
         raise
-    return result.to_dict()
 
 @task
 def fetch_weather_data():

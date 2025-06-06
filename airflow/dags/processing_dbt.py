@@ -1,6 +1,14 @@
 from airflow.decorators import dag
 from airflow.operators.bash import BashOperator
 from datetime import datetime, timedelta
+from dotenv import  dotenv_values
+import os
+
+
+dbt_env_vars = dotenv_values("/opt/airflow/.env")
+
+print("✅ ENV VARS LOADED:")
+print(dbt_env_vars)
 
 @dag(
     schedule_interval='15 16 * * *',
@@ -20,33 +28,35 @@ def dbt_weather_aggregate_prediction():
         task_id='dbt_int_weather_province',
         bash_command="""
         cd /opt/dbt && \
-        dbt run --select int_weather_province --profiles-dir /opt/dbt/.dbt
-    """
-
+        /home/airflow/.local/bin/dbt run --select int_weather_province --profiles-dir /opt/dbt/.dbt
+    """,
+        env=dbt_env_vars
     )
 
     update_fct_weather_province = BashOperator(
         task_id='dbt_fct_weather_province',
         bash_command="""
         cd /opt/dbt && \
-        dbt run --select fct_weather_province --profiles-dir /opt/dbt/.dbt
-    """
-    )
+        /home/airflow/.local/bin/dbt run --select fct_weather_province --profiles-dir /opt/dbt/.dbt
+    """,
+    env=dbt_env_vars    )
 
     update_fct_weather_region = BashOperator(
         task_id='dbt_fct_weather_region',
         bash_command="""
         cd /opt/dbt && \
-        dbt run --select fct_weather_region --profiles-dir /opt/dbt/.dbt
-    """
+        /home/airflow/.local/bin/dbt run --select fct_weather_region --profiles-dir /opt/dbt/.dbt
+    """,
+    env=dbt_env_vars
     )
 
     predict_weather_province = BashOperator(
         task_id='dbt_predict_weather_province',
         bash_command="""
         cd /opt/dbt && \
-        dbt run --select predict_weather_province --profiles-dir /opt/dbt/.dbt
-    """
+        /home/airflow/.local/bin/dbt run --select predict_weather_province --profiles-dir /opt/dbt/.dbt
+    """,
+    env=dbt_env_vars
     )
 
     update_int_weather_province >> update_fct_weather_province >> update_fct_weather_region >> predict_weather_province
