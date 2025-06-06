@@ -117,7 +117,6 @@ graph TD
     A[stg_weather_data] --> B[int_weather_data]
     B --> C[fct_weather_province]
     B --> D[fct_weather_region]
-    C --> E[predicted_weather_province]
     D --> E[predicted_weather_province]
 ```
 ## Data Modeling Approach
