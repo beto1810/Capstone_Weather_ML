@@ -208,7 +208,7 @@ predict_day_1 AS (
             AS forecast_wind_kph,
         CAST(PARSE_JSON(day_1.forecast_json):maxwind_mph AS FLOAT)
             AS forecast_wind_mph,
-        PREDICT_CONDITION(
+        KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_CONDITION(
             CAST(PARSE_JSON(day_1.forecast_json):avgtemp_c AS FLOAT),
             CAST(PARSE_JSON(day_1.forecast_json):maxtemp_c AS FLOAT),
             CAST(PARSE_JSON(day_1.forecast_json):mintemp_c AS FLOAT),
@@ -264,7 +264,7 @@ predict_day_2 AS (
             AS forecast_wind_kph,
         CAST(PARSE_JSON(day_2.forecast_json):maxwind_mph AS FLOAT)
             AS forecast_wind_mph,
-        PREDICT_CONDITION(
+        KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_CONDITION(
             CAST(PARSE_JSON(day_2.forecast_json):avgtemp_c AS FLOAT),
             CAST(PARSE_JSON(day_2.forecast_json):maxtemp_c AS FLOAT),
             CAST(PARSE_JSON(day_2.forecast_json):mintemp_c AS FLOAT),

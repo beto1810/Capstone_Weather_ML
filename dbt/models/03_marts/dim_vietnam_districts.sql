@@ -21,16 +21,13 @@ with transformed as (
 ),
 
 deduplicated as (
-    select *
-    from (
-        select
-            *,
-            row_number() over (
-                partition by district_id
-                order by updated_at desc
-            ) as row_num
-        from transformed
-    )
+    select
+        *,
+        row_number() over (
+            partition by district_id
+            order by updated_at desc
+        ) as row_num
+    from transformed
 ),
 
 final as (
