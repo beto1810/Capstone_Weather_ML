@@ -109,4 +109,4 @@ training_weather_model/*
 
 rsa_key.*
 
-dbt/.dbt/profiles.yml
+**/profiles.yml
