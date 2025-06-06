@@ -173,7 +173,7 @@ day_1 AS (
         base.province_id,
         base.region,
         base.weather_date,
-        PREDICT_ALL_WEATHER_METRICS(
+        KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_ALL_WEATHER_METRICS(
             base.avgtemp1, base.avgtemp2, base.avgtemp3,
             base.maxtemp1, base.maxtemp2, base.maxtemp3,
             base.mintemp1, base.mintemp2, base.mintemp3,
@@ -228,7 +228,7 @@ day_2 AS (
     SELECT
         predict_day_1.province_id,
         DATEADD(DAY, 2, base.weather_date) AS forecast_date,
-        PREDICT_ALL_WEATHER_METRICS(
+        KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_ALL_WEATHER_METRICS(
             base.avgtemp2, base.avgtemp3, predict_day_1.forecast_avg_temperature,
             base.maxtemp2, base.maxtemp3, predict_day_1.forecast_max_temperature,
             base.mintemp2, base.mintemp3, predict_day_1.forecast_min_temperature,
