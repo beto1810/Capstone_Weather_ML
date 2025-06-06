@@ -1,7 +1,7 @@
 # import dependencies
 from airflow import DAG
 from datetime import datetime, timedelta
-import logging  
+import logging
 import os
 from dotenv import load_dotenv
 from pathlib import Path
@@ -19,7 +19,7 @@ from Weather_ML.kafka.consumers.api_weather_consumer import consume_messages
 # Load environment variables from .env file
 load_dotenv()
 
-@task   
+@task
 def get_snowflake_hook():
 
     hook = SnowflakeHook(snowflake_conn_id='snowflake_default')
@@ -54,7 +54,7 @@ def fetch_weather_data():
 @task
 def consume_weather():
     return  consume_messages()
-    
+
 @dag(
     schedule_interval='5 * * * *',
     start_date=datetime(2023, 10, 1),
@@ -80,10 +80,10 @@ def weather_data_pipeline():
     """
 
     )
-    
+
 
     test_connection >> producer_weather_data
-    test_connection >> consume_weather_data 
+    test_connection >> consume_weather_data
     consume_weather_data >> dbt_stg_weather_data
 
 dag = weather_data_pipeline()
