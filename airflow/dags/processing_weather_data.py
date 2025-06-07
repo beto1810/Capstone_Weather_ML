@@ -114,9 +114,6 @@ def weather_data_pipeline():
 
     )
 
-
-    test_connection >> producer_weather_data
-    test_connection >> consume_weather_data
-    consume_weather_data >> dbt_stg_weather_data
+    test_connection >> producer_weather_data >> consume_weather_data >> dbt_stg_weather_data
 
 dag = weather_data_pipeline()

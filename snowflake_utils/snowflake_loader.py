@@ -6,7 +6,7 @@ import logging
 
 load_dotenv()
 
-def load_to_snowflake(data):
+def load_to_snowflake(rows):
     """Load weather data into Snowflake."""
     try:
         conn = connect(
@@ -17,9 +17,9 @@ def load_to_snowflake(data):
             database=os.getenv('SNOWFLAKE_DATABASE'),
             schema=os.getenv('SNOWFLAKE_SCHEMA')
         )
-        
+
         cursor = conn.cursor()
-        
+
         # Create a more detailed table schema matching the Weather API response
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS raw_weather_data (
@@ -51,9 +51,9 @@ def load_to_snowflake(data):
                 loaded_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
             )
         """)
-        
+
         # Insert data with all available fields
-        cursor.execute("""
+        insert_query = """
             INSERT INTO raw_weather_data (
                 province_name, last_updated, temp_c, temp_f, is_day,
                 condition_text, condition_icon, condition_code,
@@ -61,41 +61,15 @@ def load_to_snowflake(data):
                 pressure_mb, pressure_in, precip_mm, precip_in,
                 humidity, cloud, feelslike_c, feelslike_f,
                 vis_km, vis_miles, uv, gust_mph, gust_kph
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s)
-        """, (
-            data['province_name'],
-            data['last_updated'],
-            data['temp_c'],
-            data['temp_f'],
-            data['is_day'],
-            data['condition']['text'],
-            data['condition']['icon'],
-            data['condition']['code'],
-            data['wind_mph'],
-            data['wind_kph'],
-            data['wind_degree'],
-            data['wind_dir'],
-            data['pressure_mb'],
-            data['pressure_in'],
-            data['precip_mm'],
-            data['precip_in'],
-            data['humidity'],
-            data['cloud'],
-            data['feelslike_c'],
-            data['feelslike_f'],
-            data['vis_km'],
-            data['vis_miles'],
-            data['uv'],
-            data['gust_mph'],
-            data['gust_kph']
-        ))
-        
+        """
+
+        cursor.executemany(insert_query, rows)
         conn.commit()
-        logging.info(f"✅ Successfully loaded data to Snowflake for city: {data['province_name']}")
-        
+        logging.info(f"✅ Successfully loaded {len(rows)} rows into Snowflake")
+
     except Exception as e:
         logging.error(f"❌ Error loading to Snowflake: {e}")
         raise
