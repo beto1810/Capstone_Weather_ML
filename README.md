@@ -127,10 +127,11 @@ This project uses a **multi-output machine learning approach** for short-term we
 
 ```mermaid
 graph TD
-    A[stg_weather_data] --> B[int_weather_data]
-    B --> C[fct_weather_province]
-    B --> D[fct_weather_region]
-    C --> E[predicted_weather_province]
+    A[Raw_weather_data] --> B[stg_weather_data]
+    B[stg_weather_data] --> C[int_weather_data]
+    C --> D[fct_weather_province]
+    C --> E[fct_weather_region]
+    D --> F[predicted_weather_province]
 ```
 ## Data Modeling Approach
 
