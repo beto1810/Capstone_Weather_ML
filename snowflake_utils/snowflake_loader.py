@@ -48,7 +48,7 @@ def load_to_snowflake(rows):
                 uv FLOAT,
                 gust_mph FLOAT,
                 gust_kph FLOAT,
-                loaded_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+                loaded_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP() #test
             )
         """)
 
