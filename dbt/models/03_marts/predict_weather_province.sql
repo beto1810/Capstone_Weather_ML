@@ -1,3 +1,10 @@
+{{ config(
+    materialized='incremental',
+    unique_key=['province_id', 'forecast_date'],
+    incremental_strategy='merge',
+    on_schema_change='sync_all_columns'
+) }}
+
 WITH base AS (
     SELECT
         fct.province_id,
