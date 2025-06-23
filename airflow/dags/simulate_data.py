@@ -89,7 +89,7 @@ def fetch_weather_data():
 @task
 def consume_weather():
     try:
-        result = consume_messages("aaaaaaaaa")
+        result = consume_messages()
         logging.info(f"✅ Consumed {len(result)} messages successfully.")
         return result
     except Exception as e:

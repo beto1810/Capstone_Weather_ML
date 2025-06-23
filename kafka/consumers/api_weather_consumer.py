@@ -66,7 +66,7 @@ def consume_messages(timeout_ms=5000):
                 messages_processed += 1
 
             if len(batch) >= BATCH_SIZE:
-                print(f"Processing batch of {len(batch)} messages...", flush=True)
+                print(f"Processing batch of {len(bat1ch)} messages...", flush=True)
                 load_to_snowflake(batch)
                 batch.clear()  # Clear the batch after processing
 
