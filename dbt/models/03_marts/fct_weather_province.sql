@@ -5,14 +5,12 @@
 ) }}
 
 WITH cte AS (
-    SELECT
-        i.*,
-        p.region
+    SELECT i.*
     FROM {{ ref('int_weather_province') }} AS i
     INNER JOIN {{ ref('dim_vietnam_provinces') }} AS p
         ON i.province_id = p.province_id
     {% if is_incremental() %}
-        WHERE i.weather_date > (SELECT MIN(t.weather_date) FROM {{ this }} AS t)
+        WHERE i.weather_date > (SELECT MAX(t.weather_date) FROM {{ this }} AS t)
     {% endif %}
 )
 
@@ -23,25 +21,12 @@ SELECT
     e.max_temperature,
     e.min_temperature,
     e.sum_precipitation,
-    e.max_precipitation,
-    e.min_precipitation,
     e.chance_rain,
     e.avg_humidity,
     e.avg_wind_kph,
     e.avg_wind_mph,
     e.region,
-
-    KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_CONDITION(
-        e.avg_temperature,
-        e.max_temperature,
-        e.min_temperature,
-        e.sum_precipitation,
-        e.chance_rain,
-        e.avg_humidity,
-        e.avg_wind_kph,
-        e.avg_wind_mph,
-        e.region
-    ) AS condition,
+    e.predicted_condition AS condition,
 
     {% if is_incremental() %}
         t.created_at,

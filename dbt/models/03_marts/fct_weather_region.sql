@@ -22,8 +22,6 @@ weather_by_region AS (
         MIN(i.min_temperature) AS min_temperature,
         AVG(i.avg_humidity) AS avg_humidity,
         SUM(i.sum_precipitation) AS sum_precipitation,
-        MAX(i.max_precipitation) AS max_precipitation,
-        MIN(i.min_precipitation) AS min_precipitation,
         MAX(CASE WHEN i.sum_precipitation > 0 THEN 1 ELSE 0 END) AS chance_rain,
         AVG(i.avg_wind_kph) AS avg_wind_kph,
         AVG(i.avg_wind_kph * 0.621371) AS avg_wind_mph,
