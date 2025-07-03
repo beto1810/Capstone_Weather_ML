@@ -1,5 +1,4 @@
--- This model demonstrates true batch processing using the vectorized UDF
--- The PREDICT_CONDITION_VEC function processes the entire dataset as a DataFrame at once
+{{ config(materialized='table') }}
 
 
 WITH weather_features AS (

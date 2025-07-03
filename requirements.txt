@@ -10,5 +10,5 @@ confluent_kafka
 kafka-python
 pandas
 sqlfluff
-python-dotenv 
+python-dotenv
 sqlfluff-templater-dbt
