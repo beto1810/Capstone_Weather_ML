@@ -136,5 +136,19 @@ services:
     working_dir: /app/kafka/producers
     entrypoint: ["python", "api_producer.py"]
 
+  akhq:
+    image: tchiotludo/akhq:0.24.0
+    depends_on:
+      - kafka
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            my-cluster:
+              properties:
+                bootstrap.servers: "kafka:9092"
+    ports:
+      - "8081:8080"
+
 volumes:
   postgres_data:

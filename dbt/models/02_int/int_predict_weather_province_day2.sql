@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+{{ config(materialized='table') }}
 
 WITH base_with_lags AS (
     SELECT * FROM {{ ref('int_lag_weather_province') }}
@@ -52,5 +52,16 @@ SELECT
     forecast_json:avghumidity::FLOAT AS avghumidity,
     forecast_json:maxwind_kph::FLOAT AS maxwind_kph,
     forecast_json:maxwind_mph::FLOAT AS maxwind_mph,
+    KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_CONDITION_VEC(
+        avgtemp_c,
+        maxtemp_c,
+        mintemp_c,
+        totalprecip_mm,
+        daily_chance_of_rain,
+        avghumidity,
+        maxwind_kph,
+        maxwind_mph,
+        region
+    ) AS predicted_condition,
     DATEADD(DAY, 2, weather_date) AS predicted_date
 FROM day_2_predictions

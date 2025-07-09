@@ -30,7 +30,7 @@
             *,
             CURRENT_TIMESTAMP() AS loaded_at
         FROM all_predictions
-        WHERE predicted_date > (SELECT max_date FROM max_loaded)
+        WHERE predicted_date > COALESCE((SELECT max_date FROM max_loaded), '1900-01-01')
         ORDER BY province_id, predicted_date
     {% else %}
 -- First time loading, no incremental filter

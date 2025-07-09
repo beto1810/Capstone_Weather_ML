@@ -89,58 +89,11 @@ def fetch_weather_data():
 @task
 def consume_weather():
     try:
-        result = consume_messages("aaaaaaaaa")
+        result = consume_messages()
         logging.info(f"✅ Consumed {len(result)} messages successfully.")
         return result
     except Exception as e:
         logging.error("❌ Error consuming messages", exc_info=True)
-
-        # Build the failed message for DLQ
-        failed_message = {
-            "error": str(e),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-
-        # Save to Snowflake DLQ table
-        try:
-            private_key_path = "/opt/airflow/keys/rsa_key.p8"
-            with open(private_key_path, "rb") as key_file:
-                p_key = serialization.load_pem_private_key(
-                    key_file.read(),
-                    password=None,
-                    backend=default_backend()
-                )
-            pkb = p_key.private_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption()
-            )
-
-            conn = snowflake.connector.connect(
-                user="DATNGUYEN1810",
-                account="ZFLRNBO-YT37108",
-                private_key=pkb,
-                warehouse="DBT_WH",
-                database="KAFKA_AIRFLOW_WEATHER",
-                schema="PUBLIC",
-                role="USER_DBT_ROLE"
-            )
-
-            cur = conn.cursor()
-            insert_stmt = """
-                INSERT INTO DLQ_WEATHER_MESSAGES (message, error_message, error_time)
-                SELECT PARSE_JSON(%s), %s, CURRENT_TIMESTAMP()
-            """
-            cur.execute(insert_stmt, (json.dumps(failed_message), str(e)))
-            conn.commit()
-            logging.info("⚠️ Saved failed message to Snowflake DLQ table")
-
-            cur.close()
-            conn.close()
-
-        except Exception as db_err:
-            logging.error("❌ Failed to write DLQ to Snowflake", exc_info=True)
-
         return []
 
 @dag(

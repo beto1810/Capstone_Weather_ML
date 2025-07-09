@@ -56,6 +56,8 @@ def search_similar_chunks(index, query: str):
     )
     return results['matches']
 
+
+
 # -------------------------------
 # 🔹 RAG Chatbot Creator
 # -------------------------------
@@ -93,6 +95,9 @@ Please provide a helpful answer using both the context and your general knowledg
 
         response = llm.invoke(messages)
         return {"messages": response}
+
+    # def query_node(state: MessagesState):
+
 
     workflow.add_node("rag", rag_node)
     workflow.add_edge(START, "rag")
@@ -196,16 +201,16 @@ def display_sample_prompts():
                 return prompt
     return None
 
-def transcribe_audio(audio_bytes):
-    client = openai.OpenAI()  # Assumes OPENAI_API_KEY is set
-    with open("temp_audio.wav", "wb") as f:
-        f.write(audio_bytes)
-    with open("temp_audio.wav", "rb") as f:
-        transcript = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=f
-        )
-    return transcript.text
+# def transcribe_audio(audio_bytes):
+#     client = openai.OpenAI()  # Assumes OPENAI_API_KEY is set
+#     with open("temp_audio.wav", "wb") as f:
+#         f.write(audio_bytes)
+#     with open("temp_audio.wav", "rb") as f:
+#         transcript = client.audio.transcriptions.create(
+#             model="whisper-1",
+#             file=f
+#         )
+#     return transcript.text
 
 
 # -------------------------------

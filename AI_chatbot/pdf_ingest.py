@@ -37,7 +37,7 @@ def extract_text_from_pdf(uploaded_file):
 
 # Chunk the text
 def chunk_text(text):
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=10)
     return splitter.split_text(text)
 
 # Embed & upsert into Pinecone
@@ -93,6 +93,20 @@ def pdf_ingestion_component():
 
             if st.button("Process & Upload to Pinecone"):
                 chunks = chunk_text(st.session_state.uploaded_text)
+
+                # Preview chunks
+                st.subheader("📋 Chunk Preview")
+                st.write(f"Total chunks created: {len(chunks)}")
+
+                # Show first few chunks as preview
+                for i, chunk in enumerate(chunks[:5]):  # Show first 5 chunks
+                    with st.expander(f"Chunk {i+1} (Length: {len(chunk)} chars)"):
+                        st.text(chunk)
+
+                if len(chunks) > 5:
+                    st.info(f"... and {len(chunks) - 5} more chunks")
+
+                # Proceed with upload
                 index = get_pinecone_index()
                 embed_and_upsert(chunks, index)
 

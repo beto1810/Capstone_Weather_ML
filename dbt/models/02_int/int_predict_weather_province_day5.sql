@@ -86,6 +86,17 @@ SELECT
     forecast_json:avghumidity::FLOAT AS avghumidity,
     forecast_json:maxwind_kph::FLOAT AS maxwind_kph,
     forecast_json:maxwind_mph::FLOAT AS maxwind_mph,
+    KAFKA_AIRFLOW_WEATHER.WEATHER_ANALYTICS.PREDICT_CONDITION_VEC(
+        avgtemp_c,
+        maxtemp_c,
+        mintemp_c,
+        totalprecip_mm,
+        daily_chance_of_rain,
+        avghumidity,
+        maxwind_kph,
+        maxwind_mph,
+        region
+    ) AS predicted_condition,
     DATEADD(DAY, 3, predicted_date) AS predicted_date
 FROM day_5_predictions
 
