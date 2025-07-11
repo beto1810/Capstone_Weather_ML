@@ -30,26 +30,26 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dbt & sqlfluff
+      - name: Install dbt & sqlfluff & install pylint .
         run: |
           pip install dbt-core dbt-snowflake sqlfluff
           pip install sqlfluff-templater-dbt
+          pip install pylint
 
       - name: Run pylint
-        run: |
-          pip install pylint
+        run:
           pylint .
 
       - name: Install dbt packages
         run: dbt deps
 
-      - name: Set up dbt profiles.yml
+      {# - name: Set up dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
           pwd
           cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
           ls -la ~/.dbt
-        working-directory: dbt
+        working-directory: dbt #}
 
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake

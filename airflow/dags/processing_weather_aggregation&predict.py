@@ -31,7 +31,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_int_lag_weather_province",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --select int_lag_weather_province
+        /home/airflow/.local/bin/dbt run --target airflow --select int_lag_weather_province
     """,
     )
 
@@ -39,7 +39,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_int_weather_province",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --select int_weather_province
+        /home/airflow/.local/bin/dbt run --target airflow --select int_weather_province
     """,
     )
 
@@ -47,7 +47,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_fct_weather_province",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --select fct_weather_province
+        /home/airflow/.local/bin/dbt run --target airflow --select fct_weather_province
     """,
     )
 
@@ -55,7 +55,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_fct_weather_region",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --select fct_weather_region
+        /home/airflow/.local/bin/dbt run --target airflow --select fct_weather_region
     """,
     )
 
