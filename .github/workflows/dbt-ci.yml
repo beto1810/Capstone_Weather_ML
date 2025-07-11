@@ -36,7 +36,9 @@ jobs:
           pip install sqlfluff-templater-dbt
 
       - name: Run pylint
-        run: pylint .
+        run: |
+          pip install pylint
+          pylint .
 
       - name: Install dbt packages
         run: dbt deps
