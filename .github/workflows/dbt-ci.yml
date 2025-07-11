@@ -21,6 +21,7 @@ jobs:
       SNOWFLAKE_CI_USER: ${{ secrets.SNOWFLAKE_CI_USER }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
       DBT_PROFILES_DIR: ./dbt
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
