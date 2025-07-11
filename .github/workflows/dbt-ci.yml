@@ -35,6 +35,9 @@ jobs:
           pip install dbt-core dbt-snowflake sqlfluff
           pip install sqlfluff-templater-dbt
 
+      - name: Run pylint
+        run: pylint .
+
       - name: Install dbt packages
         run: dbt deps
 

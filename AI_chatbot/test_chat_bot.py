@@ -14,7 +14,11 @@ for conv_id in conversation_ids:
     if st.sidebar.button(
         f"🗂 Conversation {conv_id[:8]}...",
         key=f"conv_{conv_id}",
-        type="secondary" if conv_id == st.session_state.current_conversation_id else "primary"
+        type=(
+            "secondary"
+            if conv_id == st.session_state.current_conversation_id
+            else "primary"
+        ),
     ):
         st.session_state.current_conversation_id = conv_id
         # ✅ force rerun immediately after setting the new conversation

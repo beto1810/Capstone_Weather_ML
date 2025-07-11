@@ -15,7 +15,7 @@ WITH weather_features AS (
         w.uv_index,
         w.is_daytime,
         w.weather_condition,
-        ROW_NUMBER() OVER(PARTITION BY p.province_id ORDER BY w.weather_updated_at desc) AS FILTER_TIME
+        ROW_NUMBER() OVER (PARTITION BY p.province_id ORDER BY w.weather_updated_at DESC) AS filter_time
     FROM {{ ref('stg_weather_data') }} AS w
     INNER JOIN
         {{ ref('dim_vietnam_provinces') }} AS p
@@ -37,4 +37,4 @@ SELECT
     weather_condition,
     CURRENT_TIMESTAMP() AS created_at
 FROM weather_features
-WHERE FILTER_TIME = 1
+WHERE filter_time = 1
