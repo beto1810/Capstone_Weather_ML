@@ -13,6 +13,7 @@ jobs:
         working-directory: dbt
 
     env:
+      DBT_PROFILES_DIR: ./dbt
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
       SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
@@ -20,7 +21,6 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}_${{ github.event.number }}
       SNOWFLAKE_CI_USER: ${{ secrets.SNOWFLAKE_CI_USER }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
-      DBT_PROFILES_DIR: ./dbt
 
     steps:
       - name: Checkout code
