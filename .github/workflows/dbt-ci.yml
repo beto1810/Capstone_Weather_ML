@@ -20,7 +20,7 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}_${{ github.event.number }}
       SNOWFLAKE_CI_USER: ${{ secrets.SNOWFLAKE_CI_USER }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
-
+      DBT_PROFILES_DIR: ./dbt
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,13 +43,13 @@ jobs:
       - name: Install dbt packages
         run: dbt deps --target ci
 
-      - name: Set up dbt profiles.yml
+      {# - name: Set up dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
           pwd
           cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
           ls -la ~/.dbt
-        working-directory: dbt
+        working-directory: dbt #}
 
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake
