@@ -12,3 +12,4 @@ pandas
 sqlfluff
 python-dotenv
 sqlfluff-templater-dbt
+joblib

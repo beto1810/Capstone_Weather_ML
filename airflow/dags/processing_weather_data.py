@@ -117,7 +117,7 @@ def weather_data_pipeline():
         task_id='dbt_stg_weather_data',
         bash_command="""
         cd /opt/dbt && \
-        dbt run --select stg_weather_data --profiles-dir /opt/dbt/.dbt
+         /home/airflow/.local/bin/dbt run --select stg_weather_data --profiles-dir /opt/dbt/.dbt
     """
 
     )

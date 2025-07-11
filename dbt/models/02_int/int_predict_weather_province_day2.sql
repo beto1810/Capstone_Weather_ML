@@ -1,4 +1,4 @@
-{{ config(materialized='table') }}
+{# {{ config(materialized='table') }}
 
 WITH base_with_lags AS (
     SELECT * FROM {{ ref('int_lag_weather_province') }}
@@ -64,4 +64,4 @@ SELECT
         region
     ) AS predicted_condition,
     DATEADD(DAY, 2, weather_date) AS predicted_date
-FROM day_2_predictions
+FROM day_2_predictions #}

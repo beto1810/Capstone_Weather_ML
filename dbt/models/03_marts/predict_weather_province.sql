@@ -1,4 +1,4 @@
-{{ config(
+{# {{ config(
     materialized='incremental',
     unique_key=['province_id', 'predicted_date'],
     incremental_strategy='merge'
@@ -77,4 +77,4 @@ SELECT
     CURRENT_TIMESTAMP() AS loaded_at
 FROM all_predictions
 ORDER BY province_id, predicted_date
-{% endif %}
+{% endif %} #}

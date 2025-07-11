@@ -2,15 +2,98 @@ import requests
 import json
 import time
 import os
+import logging
 from dotenv import load_dotenv
 from pathlib import Path
 from kafka import KafkaConsumer
-from Weather_ML.snowflake_utils.snowflake_loader import load_to_snowflake
+from snowflake.connector import connect
 
 load_dotenv()
 
 BATCH_SIZE = 50  # You can adjust this
 timeout_ms = 5000  # Default timeout for Kafka polling
+
+load_dotenv()
+
+def load_to_snowflake(rows):
+    """Load weather data into Snowflake."""
+    try:
+        print("Entered load_to_snowflake", flush=True)
+        # Debug print for connection parameters
+        print("Connecting to Snowflake with:", flush=True)
+        print(f"  user={os.getenv('SNOWFLAKE_USER')}", flush=True)
+        print(f"  account={os.getenv('SNOWFLAKE_ACCOUNT')}", flush=True)
+        print(f"  warehouse={os.getenv('SNOWFLAKE_WAREHOUSE')}", flush=True)
+        print(f"  database={os.getenv('SNOWFLAKE_DATABASE')}", flush=True)
+        print(f"  schema={os.getenv('SNOWFLAKE_SCHEMA_RAW_DATA')}", flush=True)
+        conn = connect(
+            user=os.getenv('SNOWFLAKE_USER'),
+            password=os.getenv('SNOWFLAKE_PASSWORD'),
+            account=os.getenv('SNOWFLAKE_ACCOUNT'),
+            warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
+            database=os.getenv('SNOWFLAKE_DATABASE'),
+            schema=os.getenv('SNOWFLAKE_SCHEMA_RAW_DATA')
+        )
+
+        cursor = conn.cursor()
+
+        # Create a more detailed table schema matching the Weather API response
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS raw_weather_data (
+                province_name VARCHAR,
+                last_updated TIMESTAMP_NTZ,
+                temp_c FLOAT,
+                temp_f FLOAT,
+                is_day BOOLEAN,
+                condition_text VARCHAR,
+                condition_icon VARCHAR,
+                condition_code INTEGER,
+                wind_mph FLOAT,
+                wind_kph FLOAT,
+                wind_degree INTEGER,
+                wind_dir VARCHAR,
+                pressure_mb FLOAT,
+                pressure_in FLOAT,
+                precip_mm FLOAT,
+                precip_in FLOAT,
+                humidity INTEGER,
+                cloud INTEGER,
+                feelslike_c FLOAT,
+                feelslike_f FLOAT,
+                vis_km FLOAT,
+                vis_miles FLOAT,
+                uv FLOAT,
+                gust_mph FLOAT,
+                gust_kph FLOAT,
+                loaded_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+            )
+        """)
+
+        # Insert data with all available fields
+        insert_query = """
+            INSERT INTO raw_weather_data (
+                province_name, last_updated, temp_c, temp_f, is_day,
+                condition_text, condition_icon, condition_code,
+                wind_mph, wind_kph, wind_degree, wind_dir,
+                pressure_mb, pressure_in, precip_mm, precip_in,
+                humidity, cloud, feelslike_c, feelslike_f,
+                vis_km, vis_miles, uv, gust_mph, gust_kph
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s)
+        """
+
+        print(f"First row to insert: {rows[0] if rows else 'No rows'}", flush=True)
+        cursor.executemany(insert_query, rows)
+        conn.commit()
+        print(f"✅ Successfully loaded {len(rows)} rows into Snowflake", flush=True)
+
+    except Exception as e:
+        logging.error(f"❌ Error loading to Snowflake: {e}")
+        raise
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
 def transform_to_row(data_weather):
     """Convert a raw message into a tuple row for Snowflake."""
@@ -42,7 +125,7 @@ def transform_to_row(data_weather):
         data_weather['gust_kph']
     )
 
-def consume_messages(timeout_ms=5000):
+def consume_messages():
     consumer = KafkaConsumer(
         'data-weather',
         bootstrap_servers='kafka:9092',
@@ -89,4 +172,17 @@ def consume_messages(timeout_ms=5000):
     return {"messages_processed": messages_processed}
 
 if __name__ == "__main__":
-    consume_messages()
+    retry_count = 0
+    max_retries = 100  # Set to None for infinite retries
+    while True:
+        try:
+            consume_messages()
+            retry_count = 0  # Reset on successful run
+        except Exception as e:
+            print(f"Consumer crashed with error: {e}. Restarting in 5 seconds...", flush=True)
+            retry_count += 1
+            if max_retries is not None and retry_count >= max_retries:
+                print("Max retries reached. Exiting.", flush=True)
+                break
+            time.sleep(5)
+

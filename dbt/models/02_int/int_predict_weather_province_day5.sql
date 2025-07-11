@@ -1,4 +1,4 @@
-{{ config(materialized='table') }}
+{# {{ config(materialized='table') }}
 
 WITH day_2_predictions AS (
     SELECT * FROM {{ ref('int_predict_weather_province_day2') }}
@@ -99,4 +99,4 @@ SELECT
     ) AS predicted_condition,
     DATEADD(DAY, 3, predicted_date) AS predicted_date
 FROM day_5_predictions
-
+ #}
