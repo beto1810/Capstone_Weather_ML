@@ -13,7 +13,7 @@ jobs:
         working-directory: dbt
 
     env:
-      DBT_PROFILES_DIR: ./.dbt/dbt
+      DBT_PROFILES_DIR: ./profiles
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
       SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
