@@ -41,7 +41,7 @@ jobs:
           pylint .
 
       - name: Install dbt packages
-        run: dbt deps
+        run: dbt deps --target ci
 
       {# - name: Set up dbt profiles.yml
         run: |
@@ -55,10 +55,10 @@ jobs:
         run: sqlfluff lint . --dialect snowflake
 
       - name: Clean DBT Artifacts
-        run: dbt clean
+        run: dbt clean --target ci
 
       - name: Install dbt packages
-        run: dbt deps
+        run: dbt deps --target ci
 
       - name: compile dbt models
         run: dbt compile --target ci
