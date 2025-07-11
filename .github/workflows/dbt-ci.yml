@@ -43,13 +43,13 @@ jobs:
       - name: Install dbt packages
         run: dbt deps --target ci
 
-      {# - name: Set up dbt profiles.yml
+      - name: Set up dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
           pwd
           cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
           ls -la ~/.dbt
-        working-directory: dbt #}
+        working-directory: dbt
 
       - name: Lint SQL files
         run: sqlfluff lint . --dialect snowflake
