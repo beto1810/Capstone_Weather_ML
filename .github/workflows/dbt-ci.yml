@@ -68,6 +68,9 @@ jobs:
         working-directory: dbt
 
       - name: compile dbt models
+        env:
+          SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
+          SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE }}
         run: uv run dbt compile --target ci
         working-directory: dbt
 

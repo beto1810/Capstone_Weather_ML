@@ -43,19 +43,6 @@ dbt_weather:
       private_key_passphrase: "{{ env_var('SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE') }}"
       threads: 4
 
-    ci_password:
-      type: snowflake
-      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
-      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
-      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
-      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
-      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
-      user: "{{ env_var('SNOWFLAKE_CI_USER') }}"
-      private_key: "{{ env_var('SNOWFLAKE_CI_USER_PRIVATE_KEY') }}"
-      private_key_passphrase: "{{ env_var('SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE') }}"
-      password: "{{ env_var('SNOWFLAKE_CI_USER_PASSWORD') }}"
-      threads: 4
-
     prod: # see https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup#key-pair-authentication
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
