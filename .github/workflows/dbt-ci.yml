@@ -41,32 +41,30 @@ jobs:
           uv pip install dbt-core dbt-snowflake sqlfluff
           uv pip install sqlfluff-templater-dbt
 
-      - name: Set up dbt profiles.yml
-        run: |
-          mkdir -p ~/.dbt
-          pwd
-          cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
-          ls -la ~/.dbt
-        working-directory: dbt
-
       - name: Run pylint
         run: uv run pylint . --fail-under=8.0
 
       - name: Install dbt packages
         run: uv run dbt deps --target ci
+        working-directory: dbt
 
       - name: Lint SQL files
-        run: uv run sqlfluff lint . --dialect snowflake
+        run: sqlfluff lint . --dialect snowflake
+        working-directory: dbt
 
       - name: Clean DBT Artifacts
-        run: uv run dbt clean --target ci
+        run: dbt clean --target ci
+        working-directory: dbt
 
       - name: Install dbt packages
-        run: uv run dbt deps --target ci
+        run: dbt deps --target ci
+        working-directory: dbt
 
       - name: compile dbt models
-        run: uv run dbt compile --target ci
+        run: dbt compile --target ci
+        working-directory: dbt
 
       - name: Run dbt build
-        run: uv run dbt build --target ci
+        run: dbt build --target ci
+        working-directory: dbt
 
