@@ -41,7 +41,7 @@ jobs:
         run: uv venv
 
       - name: Install Python deps
-        run: uv pip install --all
+        run: uv pip install -r pyproject.toml
 
       - name: Run pylint
         run: pylint . --fail-under=8.0
