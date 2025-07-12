@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from snowflake.connector import connect
 from kafka import KafkaConsumer
 
-load_dotenv()
 
 BATCH_SIZE = 50  # You can adjust this
 TIMEOUT_MS = 5000  # Default timeout for Kafka polling

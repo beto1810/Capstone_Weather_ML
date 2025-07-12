@@ -192,8 +192,8 @@ if __name__ == "__main__":
                 logger.error("No cities found in Snowflake. Exiting.")
             else:
                 logger.info(
-                    f"Found {len(cities_df['province_name'])} cities.
-                    Starting to produce messages..."
+                    f"Found {len(cities_df['province_name'])} cities."
+                    "Starting to produce messages..."
                 )
                 messages_processed = produce_messages(cities_df)
                 logger.info(f"Total messages produced: {messages_processed}")

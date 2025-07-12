@@ -8,7 +8,6 @@ jobs:
   dbt-test:
     runs-on: ubuntu-latest
 
-
     env:
       DBT_PROFILES_DIR: ./profiles
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -28,12 +27,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dbt & sqlfluff & install pylint .
-        run: |
-          pip install dbt-core dbt-snowflake sqlfluff
-          pip install sqlfluff-templater-dbt
-          pip install pylint
-
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
@@ -43,24 +36,37 @@ jobs:
       - name: Install Python deps
         run: uv pip install -r pyproject.toml
 
+      - name: Install dbt & sqlfluff
+        run: |
+          uv pip install dbt-core dbt-snowflake sqlfluff
+          uv pip install sqlfluff-templater-dbt
+
+      - name: Set up dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          pwd
+          cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
+          ls -la ~/.dbt
+        working-directory: dbt
+
       - name: Run pylint
-        run: pylint . --fail-under=8.0
+        run: uv run pylint . --fail-under=8.0
 
       - name: Install dbt packages
-        run: dbt deps --target ci
+        run: uv run dbt deps --target ci
 
       - name: Lint SQL files
-        run: sqlfluff lint . --dialect snowflake
+        run: uv run sqlfluff lint . --dialect snowflake
 
       - name: Clean DBT Artifacts
-        run: dbt clean --target ci
+        run: uv run dbt clean --target ci
 
       - name: Install dbt packages
-        run: dbt deps --target ci
+        run: uv run dbt deps --target ci
 
       - name: compile dbt models
-        run: dbt compile --target ci
+        run: uv run dbt compile --target ci
 
       - name: Run dbt build
-        run: dbt build --target ci
+        run: uv run dbt build --target ci
 
