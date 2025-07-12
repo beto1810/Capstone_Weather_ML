@@ -35,7 +35,7 @@ def get_cities_from_snowflake():
         "SNOWFLAKE_ACCOUNT",
         "SNOWFLAKE_WAREHOUSE",
         "SNOWFLAKE_DATABASE",
-        "SNOWFLAKE_SCHEMA_ANALYSIS",
+        "SNOWFLAKE_SCHEMA",
     ]
     missing = [v for v in required if not os.getenv(v)]
     if missing:
@@ -47,7 +47,7 @@ def get_cities_from_snowflake():
             account=os.getenv("SNOWFLAKE_ACCOUNT"),
             warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
             database=os.getenv("SNOWFLAKE_DATABASE"),
-            schema=os.getenv("SNOWFLAKE_SCHEMA_ANALYSIS"),
+            schema=os.getenv("SNOWFLAKE_SCHEMA"),
             role="USER_DBT_ROLE",  # Ensure this role has access to the required tables
         )
 
@@ -57,7 +57,7 @@ def get_cities_from_snowflake():
         print(account := os.getenv("SNOWFLAKE_ACCOUNT"))
         print(warehouse := os.getenv("SNOWFLAKE_WAREHOUSE"))
         print(database := os.getenv("SNOWFLAKE_DATABASE"))
-        print(schema := os.getenv("SNOWFLAKE_SCHEMA_ANALYSIS"))
+        print(schema := os.getenv("SNOWFLAKE_SCHEMA"))
         print(role := "USER_DBT_ROLE")
         logger.info("Connecting to Snowflake as user %s on account %s", user, account)
 

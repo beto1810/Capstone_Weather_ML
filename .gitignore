@@ -109,8 +109,6 @@ training_weather_model/*
 
 rsa_key.*
 
-**/profiles.yml
-
 
 rsa_key_encrypted.p8
 

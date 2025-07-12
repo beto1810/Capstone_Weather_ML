@@ -7,9 +7,7 @@ from airflow.decorators import dag
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 
-dbt_env_vars = load_dotenv("/opt/airflow/.env")
-
-print("✅ ENV VARS LOADED:")
+dbt_env_vars = load_dotenv("/opt/Weather_ML/.env")
 
 
 @dag(

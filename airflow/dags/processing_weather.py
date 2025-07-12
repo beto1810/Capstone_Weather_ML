@@ -2,11 +2,15 @@ from datetime import datetime, timedelta
 from dotenv import dotenv_values
 from airflow.decorators import dag
 from airflow.operators.bash import BashOperator
+import os
 
-dbt_env_vars = dotenv_values("/opt/airflow/.env")
+# Load environment variables once at module level
+# Try the correct path first based on debug findings
+env_file_path = "/opt/Weather_ML/.env"
+dbt_env_vars = {}
 
-print("✅ ENV VARS LOADED:")
-print(dbt_env_vars)
+dbt_env_vars = dotenv_values(env_file_path)
+
 
 @dag(
     schedule_interval="15 * * * *",
