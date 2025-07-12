@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DBT_PROFILES_DIR: ./profiles
+      DBT_PROFILES_DIR: ./dbt/profiles
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
       SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
       SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
@@ -40,6 +40,14 @@ jobs:
         run: |
           uv pip install dbt-core dbt-snowflake sqlfluff
           uv pip install sqlfluff-templater-dbt
+
+      - name: Set up dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          pwd
+          cp profiles/profiles.yml ~/.dbt/profiles.yml
+          ls -la ~/.dbt
+        working-directory: dbt
 
       - name: Run pylint
         run: uv run pylint . --fail-under=8.0
