@@ -41,11 +41,10 @@ jobs:
         run: uv venv
 
       - name: Install Python deps
-        run: uv pip install
+        run: uv pip install --all
 
       - name: Run pylint
-        run:
-          pylint . --fail-under=8.0
+        run: pylint . --fail-under=8.0
 
       - name: Install dbt packages
         run: dbt deps --target ci
