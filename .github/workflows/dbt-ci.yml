@@ -48,6 +48,19 @@ jobs:
         run: uv run dbt deps --target ci
         working-directory: dbt
 
+      - name: Debug: Show file structure and dbt profiles path
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo "DBT_PROFILES_DIR is set to: $DBT_PROFILES_DIR"
+
+          echo "Listing all files under ./"
+          find . -type f
+
+          echo "Listing files inside DBT_PROFILES_DIR"
+          ls -al "$DBT_PROFILES_DIR"
+
       - name: Lint SQL files
         run: uv run sqlfluff lint .
         working-directory: dbt
