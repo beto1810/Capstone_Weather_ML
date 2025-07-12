@@ -56,7 +56,7 @@ jobs:
         working-directory: dbt
 
       - name: Lint SQL files
-        run: uv run sqlfluff lint . --target ci
+        run: uv run sqlfluff lint .
         working-directory: dbt
 
       - name: Clean DBT Artifacts
