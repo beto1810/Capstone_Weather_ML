@@ -78,6 +78,11 @@ config.json
 # Local profiles
 dbt_weather/profiles/profiles.yml
 
+# All profiles.yml files
+**/profiles.yml
+*.profiles.yml
+**/profiles.yml
+profiles.yml
 
 # Build artifacts
 build/
@@ -109,11 +114,10 @@ training_weather_model/*
 
 rsa_key.*
 
-**/profiles.yml
-
 
 rsa_key_encrypted.p8
 
 
 rsa_key_encrypted.p8.pub
 encrypted_key/
+

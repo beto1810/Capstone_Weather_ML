@@ -1,0 +1,56 @@
+dbt_weather:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      threads: 4
+      client_session_keep_alive: false
+      authenticator: snowflake
+      private_key_path: /Users/dat/Documents/Weather_ML/encrypted_key/rsa_key.p8  # <-- your local path
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PASS_PHRASE') }}"
+
+    airflow:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      threads: 4
+      client_session_keep_alive: false
+      authenticator: snowflake
+      private_key_path: /opt/encrypted_key/rsa_key.p8
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PASS_PHRASE') }}"
+
+
+    ci:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      user: "{{ env_var('SNOWFLAKE_CI_USER') }}"
+      authenticator: snowflake
+      private_key: "{{ env_var('SNOWFLAKE_CI_USER_PRIVATE_KEY') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE') }}"
+      threads: 4
+
+    prod: # see https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup#key-pair-authentication
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      user: "{{ env_var('SNOWFLAKE_CD_USER') }}"
+      private_key: "{{ env_var('SNOWFLAKE_CD_USER_PRIVATE_KEY') }}"
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_CD_USER_PRIVATE_KEY_PASSPHRASE') }}"
+      threads: 4

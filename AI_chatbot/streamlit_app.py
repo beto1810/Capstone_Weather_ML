@@ -1,14 +1,14 @@
-import streamlit as st
 import os
-from dotenv import load_dotenv
-from langchain_litellm import ChatLiteLLM
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-from langgraph.graph import StateGraph, END, START
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph.message import MessagesState
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import uuid
-import json
+
+import streamlit as st
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_litellm import ChatLiteLLM
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import MessagesState
 
 # Load environment variables
 load_dotenv()
@@ -21,21 +21,19 @@ Keep your responses concise and friendly. Introduce yourself and ask for the use
 # Available models
 AVAILABLE_MODELS = {
     "OpenAI: GPT-3.5-turbo": "gpt-3.5-turbo",
-    "Snowflake: Mistral-7b": "snowflake/mistral-7b"
+    "Snowflake: Mistral-7b": "snowflake/mistral-7b",
 }
 
 # Sample prompts for quick selection
 SAMPLE_PROMPTS = [
     "Tell me about FoundryAI's training programs",
-    "What courses do you offer?"
+    "What courses do you offer?",
 ]
+
 
 def setup_snowflake_credentials():
     """Set up Snowflake credentials from environment variables"""
-    required_vars = [
-        "SNOWFLAKE_JWT",
-        "SNOWFLAKE_ACCOUNT_ID"
-    ]
+    required_vars = ["SNOWFLAKE_JWT", "SNOWFLAKE_ACCOUNT_ID"]
 
     missing_vars = [var for var in required_vars if not os.environ.get(var)]
     if missing_vars:
@@ -44,8 +42,9 @@ def setup_snowflake_credentials():
 
     return {
         "jwt": os.environ["SNOWFLAKE_JWT"],
-        "account_id": os.environ["SNOWFLAKE_ACCOUNT_ID"]
+        "account_id": os.environ["SNOWFLAKE_ACCOUNT_ID"],
     }
+
 
 def create_chatbot(model_name: str, system_prompt: str):
     """Create a chatbot instance using LangGraph and LiteLLM"""
@@ -59,19 +58,18 @@ def create_chatbot(model_name: str, system_prompt: str):
             model=model_name,
             temperature=0.7,
             api_key=credentials["jwt"],
-            api_base=f"https://{credentials['account_id']}.snowflakecomputing.com/api/v2/cortex/inference:complete"
+            api_base=f"https://{credentials['account_id']}.snowflakecomputing.com/api/v2/cortex/inference:complete",
         )
     else:
-        llm = ChatLiteLLM(
-            model=model_name,
-            temperature=0.7
-        )
+        llm = ChatLiteLLM(model=model_name, temperature=0.7)
 
     # Create prompt template
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     # Create the workflow
     workflow = StateGraph(state_schema=MessagesState)
@@ -96,6 +94,7 @@ def create_chatbot(model_name: str, system_prompt: str):
 
     return app
 
+
 def init_session_state():
     """Initialize session state variables"""
     if "conversations" not in st.session_state:
@@ -107,18 +106,25 @@ def init_session_state():
     if "system_prompt" not in st.session_state:
         st.session_state.system_prompt = DEFAULT_SYSTEM_PROMPT
     if "chatbot" not in st.session_state:
-        st.session_state.chatbot = create_chatbot(st.session_state.model_name, st.session_state.system_prompt)
+        st.session_state.chatbot = create_chatbot(
+            st.session_state.model_name, st.session_state.system_prompt
+        )
+
 
 def create_new_conversation():
     """Create a new conversation"""
     conversation_id = str(uuid.uuid4())
     st.session_state.conversations[conversation_id] = []
     st.session_state.current_conversation_id = conversation_id
-    st.session_state.chatbot = create_chatbot(st.session_state.model_name, st.session_state.system_prompt)
+    st.session_state.chatbot = create_chatbot(
+        st.session_state.model_name, st.session_state.system_prompt
+    )
+
 
 def switch_conversation(conversation_id):
     """Switch to a different conversation"""
     st.session_state.current_conversation_id = conversation_id
+
 
 def config_sidebar():
     """Configure sidebar options"""
@@ -128,24 +134,32 @@ def config_sidebar():
     selected_model = st.sidebar.selectbox(
         "Select Model",
         options=list(AVAILABLE_MODELS.keys()),
-        index=list(AVAILABLE_MODELS.keys()).index(next(k for k, v in AVAILABLE_MODELS.items() if v == st.session_state.model_name))
+        index=list(AVAILABLE_MODELS.keys()).index(
+            next(
+                k
+                for k, v in AVAILABLE_MODELS.items()
+                if v == st.session_state.model_name
+            )
+        ),
     )
 
     if AVAILABLE_MODELS[selected_model] != st.session_state.model_name:
         st.session_state.model_name = AVAILABLE_MODELS[selected_model]
-        st.session_state.chatbot = create_chatbot(st.session_state.model_name, st.session_state.system_prompt)
+        st.session_state.chatbot = create_chatbot(
+            st.session_state.model_name, st.session_state.system_prompt
+        )
 
     # System prompt customization
     st.sidebar.title("System Prompt")
     new_system_prompt = st.sidebar.text_area(
-        "Customize System Prompt",
-        value=st.session_state.system_prompt,
-        height=150
+        "Customize System Prompt", value=st.session_state.system_prompt, height=150
     )
 
     if new_system_prompt != st.session_state.system_prompt:
         st.session_state.system_prompt = new_system_prompt
-        st.session_state.chatbot = create_chatbot(st.session_state.model_name, st.session_state.system_prompt)
+        st.session_state.chatbot = create_chatbot(
+            st.session_state.model_name, st.session_state.system_prompt
+        )
 
     # Conversation management
     st.sidebar.title("Conversations")
@@ -157,13 +171,18 @@ def config_sidebar():
         if st.sidebar.button(
             f"Conversation {conv_id[:8]}...",
             key=f"conv_{conv_id}",
-            type="secondary" if conv_id == st.session_state.current_conversation_id else "primary"
+            type=(
+                "secondary"
+                if conv_id == st.session_state.current_conversation_id
+                else "primary"
+            ),
         ):
             switch_conversation(conv_id)
 
     # Debug information
     if st.sidebar.checkbox("Show Debug Info"):
         st.sidebar.json(st.session_state)
+
 
 def display_sample_prompts():
     """Display sample prompts for quick selection"""
@@ -175,6 +194,7 @@ def display_sample_prompts():
                 return prompt
     return None
 
+
 def main():
     st.title("FoundryAI Training Assistant")
 
@@ -185,7 +205,9 @@ def main():
     config_sidebar()
 
     # Display chat messages
-    for message in st.session_state.conversations.get(st.session_state.current_conversation_id, []):
+    for message in st.session_state.conversations.get(
+        st.session_state.current_conversation_id, []
+    ):
         if message["role"] != "system":  # Don't display system messages
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
@@ -198,13 +220,17 @@ def main():
 
     if prompt:
         # Add user message to chat history
-        if st.session_state.current_conversation_id not in st.session_state.conversations:
-            st.session_state.conversations[st.session_state.current_conversation_id] = []
+        if (
+            st.session_state.current_conversation_id
+            not in st.session_state.conversations
+        ):
+            st.session_state.conversations[st.session_state.current_conversation_id] = (
+                []
+            )
 
-        st.session_state.conversations[st.session_state.current_conversation_id].append({
-            "role": "user",
-            "content": prompt
-        })
+        st.session_state.conversations[st.session_state.current_conversation_id].append(
+            {"role": "user", "content": prompt}
+        )
 
         # Display user message
         with st.chat_message("user"):
@@ -221,7 +247,11 @@ def main():
                     # Get response from the model
                     result = st.session_state.chatbot.invoke(
                         {"messages": input_messages},
-                        config={"configurable": {"thread_id": st.session_state.current_conversation_id}}
+                        config={
+                            "configurable": {
+                                "thread_id": st.session_state.current_conversation_id
+                            }
+                        },
                     )
 
                     if result and "messages" in result and result["messages"]:
@@ -229,12 +259,12 @@ def main():
                         message_placeholder.markdown(response)
 
                         # Add assistant response to chat history
-                        st.session_state.conversations[st.session_state.current_conversation_id].append({
-                            "role": "assistant",
-                            "content": response
-                        })
+                        st.session_state.conversations[
+                            st.session_state.current_conversation_id
+                        ].append({"role": "assistant", "content": response})
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
+
 
 if __name__ == "__main__":
     main()

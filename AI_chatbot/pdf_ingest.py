@@ -1,12 +1,12 @@
+import os
+import uuid
+
 import streamlit as st
-from PyPDF2 import PdfReader
+from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from pinecone import Pinecone
-import os
-from dotenv import load_dotenv
-import uuid
-import time
+from PyPDF2 import PdfReader
 
 # Load env
 load_dotenv()
@@ -15,6 +15,7 @@ load_dotenv()
 PINECONE_INDEX_NAME = "weather-capstone-project"
 PINECONE_NAMESPACE = "weather-data"
 
+
 # Set up Pinecone
 def get_pinecone_index():
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
@@ -22,10 +23,15 @@ def get_pinecone_index():
         st.error("Missing PINECONE_API_KEY in .env")
         st.stop()
     pc = Pinecone(api_key=pinecone_api_key)
-    if PINECONE_INDEX_NAME not in [idx['name'] for idx in pc.list_indexes()]:
-        pc.create_index(PINECONE_INDEX_NAME, dimension=1536, metric="cosine",
-                        spec={"serverless": {"cloud": "aws", "region": "us-east-1"}})
+    if PINECONE_INDEX_NAME not in [idx["name"] for idx in pc.list_indexes()]:
+        pc.create_index(
+            PINECONE_INDEX_NAME,
+            dimension=1536,
+            metric="cosine",
+            spec={"serverless": {"cloud": "aws", "region": "us-east-1"}},
+        )
     return pc.Index(PINECONE_INDEX_NAME)
+
 
 # Extract PDF text
 def extract_text_from_pdf(uploaded_file):
@@ -35,10 +41,12 @@ def extract_text_from_pdf(uploaded_file):
         text += page.extract_text() or ""
     return text
 
+
 # Chunk the text
 def chunk_text(text):
     splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=10)
     return splitter.split_text(text)
+
 
 # Embed & upsert into Pinecone
 def embed_and_upsert(chunks, index):
@@ -48,14 +56,13 @@ def embed_and_upsert(chunks, index):
         vectors = []
         for i, chunk in enumerate(chunks):
             vector = embedder.embed_query(chunk)
-            vectors.append({
-                "id": f"chunk-{uuid.uuid4()}",
-                "values": vector,
-                "metadata": {
-                    "chunk_text": chunk,
-                    "category": "uploaded_pdf"
+            vectors.append(
+                {
+                    "id": f"chunk-{uuid.uuid4()}",
+                    "values": vector,
+                    "metadata": {"chunk_text": chunk, "category": "uploaded_pdf"},
                 }
-            })
+            )
 
         try:
             index.upsert(vectors=vectors, namespace=PINECONE_NAMESPACE)
@@ -79,9 +86,7 @@ def pdf_ingestion_component():
     # If not uploaded or processing is not done
     if not st.session_state.pdf_upload_done:
         uploaded_file = st.file_uploader(
-            "Upload your PDF",
-            type=["pdf"],
-            key=st.session_state.file_uploader_key
+            "Upload your PDF", type=["pdf"], key=st.session_state.file_uploader_key
         )
 
         if uploaded_file:
@@ -89,7 +94,11 @@ def pdf_ingestion_component():
                 # Extract and store text (only once)
                 st.session_state.uploaded_text = extract_text_from_pdf(uploaded_file)
 
-            st.text_area("📜 Extracted Text (Preview)", value=st.session_state.uploaded_text[:1000], height=200)
+            st.text_area(
+                "📜 Extracted Text (Preview)",
+                value=st.session_state.uploaded_text[:1000],
+                height=200,
+            )
 
             if st.button("Process & Upload to Pinecone"):
                 chunks = chunk_text(st.session_state.uploaded_text)
