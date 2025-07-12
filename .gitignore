@@ -81,6 +81,8 @@ dbt_weather/profiles/profiles.yml
 # All profiles.yml files
 **/profiles.yml
 *.profiles.yml
+**/profiles.yml
+profiles.yml
 
 # Build artifacts
 build/
