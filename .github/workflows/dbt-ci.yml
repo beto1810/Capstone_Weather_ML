@@ -16,7 +16,7 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
       SNOWFLAKE_CI_USER: ${{ secrets.SNOWFLAKE_CI_USER }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
-
+      SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
