@@ -3,17 +3,17 @@ dbt_weather:
   outputs:
     dev:
       type: snowflake
-      account: FITPZLR-PC35225
-      user: datnguyen1810
-      role: USER_DBT_ROLE
-      database: KAFKA_AIRFLOW_WEATHER
-      warehouse: COMPUTE_WH
-      schema: WEATHER_ANALYTICS
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
       threads: 4
       client_session_keep_alive: false
       authenticator: snowflake
       private_key_path: /Users/dat/Documents/Weather_ML/encrypted_key/rsa_key.p8  # <-- your local path
-      private_key_passphrase: '181093'
+      private_key_passphrase: "{{ env_var('SNOWFLAKE_PASS_PHRASE') }}"
 
     airflow:
       type: snowflake
