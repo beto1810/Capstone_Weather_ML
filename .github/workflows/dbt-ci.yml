@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt
           pwd
-          cp ./dbt/profiles.yml ~/.dbt/profiles.yml
+          cp .dbt/profiles-cicd.yml ~/.dbt/profiles.yml
           ls -la ~/.dbt
         working-directory: dbt
 
