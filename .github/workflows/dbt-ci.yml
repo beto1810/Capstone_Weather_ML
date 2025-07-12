@@ -68,10 +68,10 @@ jobs:
         working-directory: dbt
 
       - name: compile dbt models
-        run: uv run dbt compile --target ci
+        run: uv run dbt compile
         working-directory: dbt
 
       - name: Run dbt build
-        run: uv run dbt build --target ci
+        run: uv run dbt build
         working-directory: dbt
 
