@@ -34,6 +34,12 @@ jobs:
           pip install sqlfluff-templater-dbt
           pip install pylint
 
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install Python deps
+        run: uv pip install -r requirements.txt
+
       - name: Run pylint
         run:
           pylint .

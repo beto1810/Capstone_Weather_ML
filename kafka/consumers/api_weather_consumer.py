@@ -11,7 +11,7 @@ from kafka import KafkaConsumer
 load_dotenv()
 
 BATCH_SIZE = 50  # You can adjust this
-timeout_ms = 5000  # Default timeout for Kafka polling
+TIMEOUT_MS = 5000  # Default timeout for Kafka polling
 
 load_dotenv()
 
@@ -133,7 +133,7 @@ def consume_messages():
         enable_auto_commit=True,
         group_id="weather-consumer-group",
         value_deserializer=lambda x: json.loads(x.decode("utf-8")),
-        consumer_timeout_ms=timeout_ms,
+        consumer_timeout_ms=TIMEOUT_MS,
     )
 
     print("Starting consumer...", flush=True)
@@ -173,19 +173,19 @@ def consume_messages():
 
 
 if __name__ == "__main__":
-    retry_count = 0
-    max_retries = 100  # Set to None for infinite retries
+    RETRY_COUNT = 0
+    MAX_RETRIES = 100  # Set to None for infinite retries
     while True:
         try:
             consume_messages()
-            retry_count = 0  # Reset on successful run
+            RETRY_COUNT = 0  # Reset on successful run
         except Exception as e:
             print(
                 f"Consumer crashed with error: {e}. Restarting in 5 seconds...",
                 flush=True,
             )
-            retry_count += 1
-            if max_retries is not None and retry_count >= max_retries:
+            RETRY_COUNT += 1
+            if MAX_RETRIES is not None and RETRY_COUNT >= MAX_RETRIES:
                 print("Max retries reached. Exiting.", flush=True)
                 break
             time.sleep(5)
