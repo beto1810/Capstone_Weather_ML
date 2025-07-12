@@ -29,23 +29,23 @@ models:
   dbt_weather:
     # Config defaults for all models in dbt_weather
     +materialized: view
-    
+
     # Staging models configuration
-    staging:
+    01_staging:
       +schema: WEATHER_ANALYTICS
       +database: KAFKA_AIRFLOW_WEATHER
       +materialized: view
       +tags: ["staging"]
 
     # intermediate models configuration
-    intermediate:
+    02_int:
       +schema: WEATHER_ANALYTICS
       +database: KAFKA_AIRFLOW_WEATHER
       +materialized: view
       +tags: ["intermediate"]
 
     # marts models configuration
-    marts:
+    03_marts:
       +schema: WEATHER_ANALYTICS
       +database: KAFKA_AIRFLOW_WEATHER
       +materialized: table
