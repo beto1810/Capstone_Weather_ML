@@ -49,22 +49,22 @@ jobs:
         working-directory: dbt
 
       - name: Lint SQL files
-        run: sqlfluff lint . --dialect snowflake
+        run: uv run sqlfluff lint . --dialect snowflake
         working-directory: dbt
 
       - name: Clean DBT Artifacts
-        run: dbt clean --target ci
+        run: uv run dbt clean --target ci
         working-directory: dbt
 
       - name: Install dbt packages
-        run: dbt deps --target ci
+        run: uv run dbt deps --target ci
         working-directory: dbt
 
       - name: compile dbt models
-        run: dbt compile --target ci
+        run: uv run dbt compile --target ci
         working-directory: dbt
 
       - name: Run dbt build
-        run: dbt build --target ci
+        run: uv run dbt build --target ci
         working-directory: dbt
 
