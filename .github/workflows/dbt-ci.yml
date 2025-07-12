@@ -41,13 +41,6 @@ jobs:
           uv pip install dbt-core dbt-snowflake sqlfluff
           uv pip install sqlfluff-templater-dbt
 
-      - name: Run pylint
-        run: uv run pylint . --fail-under=8.0
-
-      - name: Install dbt packages
-        run: uv run dbt deps --target ci
-        working-directory: dbt
-
       - name: Debug: Show file structure and dbt profiles path
         run: |
           echo "Current directory:"
@@ -61,8 +54,15 @@ jobs:
           echo "Listing files inside DBT_PROFILES_DIR"
           ls -al "$DBT_PROFILES_DIR"
 
+      - name: Run pylint
+        run: uv run pylint . --fail-under=8.0
+
+      - name: Install dbt packages
+        run: uv run dbt deps --target ci
+        working-directory: dbt
+
       - name: Lint SQL files
-        run: uv run sqlfluff lint .
+        run: uv run sqlfluff lint . --dialect snowflake
         working-directory: dbt
 
       - name: Clean DBT Artifacts
