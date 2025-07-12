@@ -54,7 +54,7 @@ jobs:
         working-directory: dbt
 
       - name: Lint SQL files
-        run: uv run sqlfluff lint . --dialect snowflake
+        run: uv run sqlfluff lint .
         working-directory: dbt
 
       - name: Clean DBT Artifacts
