@@ -2,10 +2,8 @@ import json
 import logging
 import os
 import time
-
 from dotenv import load_dotenv
 from snowflake.connector import connect
-
 from kafka import KafkaConsumer
 
 load_dotenv()
