@@ -17,7 +17,6 @@ jobs:
       SNOWFLAKE_CI_USER: ${{ secrets.SNOWFLAKE_CI_USER }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY }}
       SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE }}
-      SNOWFLAKE_CI_USER_PASSWORD: ${{ secrets.SNOWFLAKE_CI_USER_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,53 +63,15 @@ jobs:
         run: uv run dbt clean --target ci
         working-directory: dbt
 
-      - name: Debug environment variables
-        run: |
-          echo "Checking environment variables..."
-          echo "SNOWFLAKE_CI_USER: ${SNOWFLAKE_CI_USER}"
-          echo "SNOWFLAKE_CI_USER_PRIVATE_KEY length: ${#SNOWFLAKE_CI_USER_PRIVATE_KEY}"
-          echo "SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE length: ${#SNOWFLAKE_CI_USER_PRIVATE_KEY_PASSPHRASE}"
-          echo "Private key starts with: ${SNOWFLAKE_CI_USER_PRIVATE_KEY:0:50}..."
-          echo "Private key ends with: ...${SNOWFLAKE_CI_USER_PRIVATE_KEY: -50}"
-        working-directory: dbt
-
-      - name: Validate private key format
-        run: |
-          echo "Validating private key format..."
-          if [[ "${SNOWFLAKE_CI_USER_PRIVATE_KEY}" == *"-----BEGIN PRIVATE KEY-----"* ]]; then
-            echo "Private key format looks correct (PKCS#8)"
-          elif [[ "${SNOWFLAKE_CI_USER_PRIVATE_KEY}" == *"-----BEGIN RSA PRIVATE KEY-----"* ]]; then
-            echo "Private key format looks correct (RSA)"
-          else
-            echo "WARNING: Private key format may be incorrect"
-            echo "Expected to contain '-----BEGIN PRIVATE KEY-----' or '-----BEGIN RSA PRIVATE KEY-----'"
-          fi
-        working-directory: dbt
-
-      - name: Test Snowflake connection
-        run: uv run dbt debug --target ci
-        working-directory: dbt
-
-      - name: Test Snowflake connection with password (fallback)
-        if: failure()
-        run: uv run dbt debug --target ci_password
+      - name: Install dbt packages
+        run: uv run dbt deps --target ci
         working-directory: dbt
 
       - name: compile dbt models
         run: uv run dbt compile --target ci
         working-directory: dbt
 
-      - name: compile dbt models with password (fallback)
-        if: failure()
-        run: uv run dbt compile --target ci_password
-        working-directory: dbt
-
       - name: Run dbt build
         run: uv run dbt build --target ci
-        working-directory: dbt
-
-      - name: Run dbt build with password (fallback)
-        if: failure()
-        run: uv run dbt build --target ci_password
         working-directory: dbt
 
