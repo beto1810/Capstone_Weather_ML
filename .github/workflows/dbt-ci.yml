@@ -37,12 +37,15 @@ jobs:
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
+      - name: Set up uv virtualenv
+        run: uv venv
+
       - name: Install Python deps
-        run: uv pip install -r requirements.txt
+        run: uv pip install
 
       - name: Run pylint
         run:
-          pylint .
+          pylint . --fail-under=8.0
 
       - name: Install dbt packages
         run: dbt deps --target ci
