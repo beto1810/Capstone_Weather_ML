@@ -13,6 +13,7 @@ from kafka.errors import KafkaError
 
 load_dotenv()
 # Configure logging
+#test git revert
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
