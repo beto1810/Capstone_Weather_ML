@@ -17,7 +17,8 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain.tools import tool
 import snowflake.connector
 import dateparser
-from datetime import datetime
+from datetime import datetime, timedelta
+import re
 
 # Load environment variables
 load_dotenv()
@@ -112,7 +113,11 @@ Provide a clear and accurate response based on this context whenever possible an
     else:
         source_note = ""
 
-    return response.content + source_note
+    # Ensure response.content is a string for concatenation
+    content = response.content
+    if isinstance(content, list):
+        content = ''.join(str(x) for x in content)
+    return content + source_note
 
 
 
@@ -144,15 +149,43 @@ def query_snowflake_weather(query: str) -> str:
     date_filter = extract_date_with_llm(query)
     parsed_date = dateparser.parse(date_filter)
 
+    # --- Detect 'next X days' or 'in X days' for forecast range ---
+    forecast_days = None
+    forecast_start = None
+    forecast_end = None
+    weekend_dates = None
+    next_days_match = re.search(r"next (\d+) days", date_filter.lower())
+    in_days_match = re.search(r"in (\d+) days", date_filter.lower())
+    if next_days_match:
+        forecast_days = int(next_days_match.group(1))
+    elif in_days_match:
+        forecast_days = int(in_days_match.group(1))
+    elif "weekend" in date_filter.lower():
+        # Find next Saturday and Sunday
+        today_weekday = datetime.now().weekday()  # Monday=0, Sunday=6
+        days_until_saturday = (5 - today_weekday) % 7
+        days_until_sunday = (6 - today_weekday) % 7
+        next_saturday = datetime.now().date() + timedelta(days=days_until_saturday)
+        next_sunday = datetime.now().date() + timedelta(days=days_until_sunday)
+        weekend_dates = [next_saturday, next_sunday]
+
     # --- Decide which table to query ---
     FCT_CURRENT = "FCT_CURRENT_WEATHER_PROVINCE"
     FCT_HISTORY = "FCT_WEATHER_PROVINCE"
-    FCT_FORECAST = "WEATHER_PREDICTIONS_7DAYS"
+    FCT_FORECAST = "PREDICT_WEATHER_PROVINCE_7DAYS"
 
     today = datetime.now().date()
     table_name = FCT_CURRENT  # Default
 
-    if parsed_date:
+    if forecast_days:
+        table_name = FCT_FORECAST
+        if forecast_start is None:
+            forecast_start = datetime.now().date() + timedelta(days=1)
+        if forecast_end is None:
+            forecast_end = forecast_start + timedelta(days=forecast_days - 1)
+    elif weekend_dates:
+        table_name = FCT_FORECAST
+    elif parsed_date:
         date_only = parsed_date.date()
         if date_only > today:
             table_name = FCT_FORECAST
@@ -161,7 +194,7 @@ def query_snowflake_weather(query: str) -> str:
         else:
             table_name = FCT_CURRENT
     else:
-        if date_filter.lower() in ["forecast", "tomorrow", "next week"]:
+        if date_filter.lower() in ["forecast", "tomorrow", "next week","next"]:
             table_name = FCT_FORECAST
         elif date_filter.lower() in ["yesterday", "last week", "last month"]:
             table_name = FCT_HISTORY
@@ -169,10 +202,21 @@ def query_snowflake_weather(query: str) -> str:
             table_name = FCT_CURRENT
 
     # --- Build SQL query ---
-    sql = f"SELECT {table_name}.*, PROVINCE_NAME FROM {table_name} JOIN DIM_VIETNAM_PROVINCES ON {table_name}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID   WHERE province_name = %s"
+    sql = f"SELECT {table_name}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {table_name} JOIN DIM_VIETNAM_PROVINCES ON {table_name}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID   WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
     params = [city]
 
-    if parsed_date and table_name != FCT_CURRENT:
+    if forecast_days:
+        # Query for a range of forecast days
+        if forecast_start is not None and forecast_end is not None:
+            sql += " AND predicted_date >= %s AND predicted_date <= %s"
+            params.append(forecast_start.strftime("%Y-%m-%d"))
+            params.append(forecast_end.strftime("%Y-%m-%d"))
+    elif weekend_dates:
+        # Query for both Saturday and Sunday
+        sql += " AND predicted_date IN (%s, %s)"
+        params.append(weekend_dates[0].strftime("%Y-%m-%d"))
+        params.append(weekend_dates[1].strftime("%Y-%m-%d"))
+    elif parsed_date and table_name != FCT_CURRENT:
         date_column = "predicted_date" if table_name == FCT_FORECAST else "created_at"
         sql += f" AND {date_column} = %s"
         params.append(parsed_date.strftime("%Y-%m-%d"))
