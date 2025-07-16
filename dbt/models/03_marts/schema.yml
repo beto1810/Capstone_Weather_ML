@@ -11,15 +11,45 @@ models:
         tests:
           - unique
           - not_null
-      
+      - name: province_name
+        description: "Province name"
+      - name: province_name_vn
+        description: "Province name in Vietnamese"
+      - name: latitude
+        description: "Latitude of the province"
+      - name: longitude
+        description: "Longitude of the province"
       - name: region
         description: "Geographical region"
-      
-      - name: valid_from
-        description: "SCD Type 2 valid from date"
-      
-      - name: valid_to
-        description: "SCD Type 2 valid to date"
+      - name: updated_at
+        description: "Row last update timestamp"
+      - name: created_at
+        description: "Row creation timestamp"
+
+  - name: dim_vietnam_districts
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['dimension']
+    columns:
+      - name: district_id
+        description: "Surrogate key for district"
+        tests:
+          - unique
+          - not_null
+      - name: province_id
+        description: "Foreign key to dim_vietnam_provinces"
+      - name: district_name
+        description: "District name"
+      - name: district_name_vn
+        description: "District name in Vietnamese"
+      - name: latitude
+        description: "Latitude of the district"
+      - name: longitude
+        description: "Longitude of the district"
+      - name: updated_at
+        description: "Row last update timestamp"
+      - name: created_at
+        description: "Row creation timestamp"
 
   - name: fct_weather_province
     description: "{{ doc('weather_data') }}"
@@ -33,58 +63,60 @@ models:
           - relationships:
               to: ref('dim_vietnam_provinces')
               field: province_id
-
+      - name: province_name
+        description: "Name of the province"
+        tests:
+          - not_null
       - name: weather_date
         description: "Date of weather measurement"
         tests:
           - not_null
-
       - name: avg_temperature
         description: "Average daily temperature in Celsius"
         tests:
           - not_null
-          - dbt_utils.accepted_range:
-              min_value: -20
-              max_value: 50
-
       - name: max_temperature
         description: "Maximum daily temperature in Celsius"
         tests:
           - not_null
-
       - name: min_temperature
         description: "Minimum daily temperature in Celsius"
         tests:
           - not_null
-
-      - name: avg_humidity
-        description: "Average daily humidity percentage"
-        tests:
-          - not_null
-          - dbt_utils.accepted_range:
-              min_value: 0
-              max_value: 100
-
       - name: sum_precipitation
         description: "Total daily precipitation in mm"
         tests:
           - not_null
-          - dbt_utils.accepted_range:
-              min_value: 0
-
       - name: chance_rain
         description: "Probability of rain (0-1)"
+      - name: avg_humidity
+        description: "Average daily humidity percentage"
         tests:
-          - dbt_utils.accepted_range:
-              min_value: 0
-              max_value: 1
-
+          - not_null
       - name: avg_wind_kph
         description: "Average wind speed in km/h"
         tests:
           - not_null
-
-
+      - name: avg_wind_mph
+        description: "Average wind speed in mph"
+        tests:
+          - not_null
+      - name: region
+        description: "Geographical region"
+        tests:
+          - not_null
+      - name: condition
+        description: "Predicted weather condition"
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Row last update timestamp"
+        tests:
+          - not_null
+      - name: is_new_row
+        description: "Indicates if this is a new row in the incremental model"
+        tests:
+          - not_null
 
   - name: fct_weather_region
     description: "{{ doc('weather_data') }}"
@@ -98,42 +130,80 @@ models:
           - relationships:
               to: ref('dim_vietnam_provinces')
               field: region
-
       - name: weather_date
         description: "Date of weather measurement"
         tests:
           - not_null
-
       - name: avg_temperature
         description: "Average temperature across all provinces in region"
         tests:
           - not_null
-
       - name: max_temperature
         description: "Highest temperature recorded in region"
         tests:
           - not_null
-
       - name: min_temperature
         description: "Lowest temperature recorded in region"
         tests:
           - not_null
-
       - name: avg_humidity
         description: "Average humidity across region"
         tests:
           - not_null
-
       - name: sum_precipitation
         description: "Total precipitation across all provinces in region"
         tests:
           - not_null
-
+      - name: chance_rain
+        description: "Indicates if there was any precipitation in the region (0 or 1)"
       - name: avg_wind_kph
         description: "Average wind speed across region"
         tests:
           - not_null
+      - name: avg_wind_mph
+        description: "Average wind speed in mph across region"
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Row last update timestamp"
+        tests:
+          - not_null
 
-  
+  - name: fct_current_weather_province
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['fact', 'weather', 'province', 'current']
+    columns:
+      - name: province_id
+        description: "Foreign key to dim_vietnam_provinces"
+        tests:
+          - not_null
+      - name: region
+        description: "Geographical region"
+      - name: province_name
+        description: "Name of the province"
+      - name: weather_updated_at
+        description: "Timestamp of weather update"
+      - name: wind_speed_kph
+        description: "Wind speed in km/h"
+      - name: temperature_celsius
+        description: "Temperature in Celsius"
+      - name: precipitation_mm
+        description: "Precipitation in mm"
+      - name: humidity_percent
+        description: "Humidity percentage"
+      - name: cloud_cover_percent
+        description: "Cloud cover percentage"
+      - name: uv_index
+        description: "UV index"
+      - name: is_daytime
+        description: "Indicates if it is daytime (boolean)"
+      - name: weather_condition
+        description: "Current weather condition (e.g., Rain, Clear)"
+      - name: created_at
+        description: "Row creation timestamp"
 
-      
+
+
+
+

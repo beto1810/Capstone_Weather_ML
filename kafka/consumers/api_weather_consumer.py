@@ -1,3 +1,4 @@
+"""Kafka consumer for weather data, loads messages into Snowflake."""
 import json
 import logging
 import os
@@ -78,13 +79,13 @@ def load_to_snowflake(rows):
                     %s, %s, %s, %s, %s)
         """
 
-        print(f"First row to insert: {rows[0] if rows else 'No rows'}", flush=True)
+        print("First row to insert: %s", rows[0] if rows else 'No rows', flush=True)
         cursor.executemany(insert_query, rows)
         conn.commit()
-        print(f"✅ Successfully loaded {len(rows)} rows into Snowflake", flush=True)
+        print("✅ Successfully loaded %d rows into Snowflake", len(rows), flush=True)
 
     except Exception as e:
-        logging.error(f"❌ Error loading to Snowflake: {e}")
+        logging.error("❌ Error loading to Snowflake: %s", e)
         raise
     finally:
         if "conn" in locals():
@@ -123,6 +124,7 @@ def transform_to_row(data_weather):
 
 
 def consume_messages():
+    """Consume weather data messages from Kafka and load them into Snowflake."""
     consumer = KafkaConsumer(
         "data-weather",
         bootstrap_servers="kafka:9092",
@@ -146,21 +148,24 @@ def consume_messages():
                 messages_processed += 1
 
             if len(batch) >= BATCH_SIZE:
-                print(f"Processing batch of {len(batch)} messages...", flush=True)
+                print("Processing batch of %d messages...", len(batch), flush=True)
                 load_to_snowflake(batch)
                 batch.clear()  # Clear the batch after processing
 
         if batch:
-            print(f"Processing final batch of {len(batch)} messages...", flush=True)
+            print("Processing final batch of %d messages...", len(batch), flush=True)
             load_to_snowflake(batch)
             batch.clear()
 
-        print(f"Processed {messages_processed} messages in total.", flush=True)
+        print("Processed %d messages in total.", messages_processed, flush=True)
 
     except KeyboardInterrupt:
         print("Consumer stopped by user.")
+    except (json.JSONDecodeError) as e:
+        logging.error("Error consuming messages: %s", e)
+        raise
     except Exception as e:
-        print(f"Error consuming messages: {str(e)}")
+        logging.error("Unexpected error consuming messages: %s", e)
         raise
     finally:
         consumer.close()
@@ -177,12 +182,12 @@ if __name__ == "__main__":
             consume_messages()
             RETRY_COUNT = 0  # Reset on successful run
         except Exception as e:
-            print(
-                f"Consumer crashed with error: {e}. Restarting in 5 seconds...",
-                flush=True,
+            logging.error(
+                "Consumer crashed with error: %s. Restarting in 5 seconds...",
+                e,
             )
             RETRY_COUNT += 1
             if MAX_RETRIES is not None and RETRY_COUNT >= MAX_RETRIES:
-                print("Max retries reached. Exiting.", flush=True)
+                logging.error("Max retries reached. Exiting.")
                 break
             time.sleep(5)

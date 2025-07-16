@@ -116,7 +116,7 @@ def predict_weather_7day():
             result_row = {
                 "province_id": row["province_id"],
                 "region": row["region"],
-                "date": (base_date + timedelta(days=day)).strftime("%Y-%m-%d"),
+                "predicted_date": (base_date + timedelta(days=day)).strftime("%Y-%m-%d"),
                 "AVGTEMP_C": pred[0],
                 "MAXTEMP_C": pred[1],
                 "MINTEMP_C": pred[2],
@@ -158,7 +158,7 @@ def predict_weather_7day():
         CREATE TABLE IF NOT EXISTS WEATHER_PREDICTIONS_7DAYS (
             PROVINCE_ID VARCHAR,
             REGION VARCHAR,
-            DATE DATE,
+            PREDICTED_DATE DATE,
             AVGTEMP_C FLOAT,
             MAXTEMP_C FLOAT,
             MINTEMP_C FLOAT,
@@ -178,7 +178,7 @@ def predict_weather_7day():
     # Prepare insert statement
     insert_sql = """
         INSERT INTO WEATHER_PREDICTIONS_7DAYS (
-            PROVINCE_ID, REGION, DATE, AVGTEMP_C, MAXTEMP_C, MINTEMP_C,
+            PROVINCE_ID, REGION, predicted_date, AVGTEMP_C, MAXTEMP_C, MINTEMP_C,
             TOTALPRECIP_MM, DAILY_CHANCE_OF_RAIN, AVGHUMIDITY, MAXWIND_KPH, MAXWIND_MPH, PREDICTED_CONDITION
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """

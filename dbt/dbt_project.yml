@@ -32,21 +32,18 @@ models:
 
     # Staging models configuration
     01_staging:
-      +schema: WEATHER_ANALYTICS
       +database: KAFKA_AIRFLOW_WEATHER
       +materialized: view
       +tags: ["staging"]
 
     # intermediate models configuration
     02_int:
-      +schema: WEATHER_ANALYTICS
       +database: KAFKA_AIRFLOW_WEATHER
       +materialized: view
       +tags: ["intermediate"]
 
     # marts models configuration
     03_marts:
-      +schema: WEATHER_ANALYTICS
       +database: KAFKA_AIRFLOW_WEATHER
       +materialized: table
 

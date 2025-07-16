@@ -44,12 +44,12 @@ def extract_text_from_pdf(uploaded_file):
 
 # Chunk the text
 def chunk_text(text):
-    splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=10)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=10)
     return splitter.split_text(text)
 
 
 # Embed & upsert into Pinecone
-def embed_and_upsert(chunks, index):
+def embed_and_upsert(chunks, index,file_name:str):
     embedder = OpenAIEmbeddings()  # or your LiteLLM-compatible embedding class
 
     with st.spinner("Embedding and uploading to Pinecone..."):
@@ -60,7 +60,10 @@ def embed_and_upsert(chunks, index):
                 {
                     "id": f"chunk-{uuid.uuid4()}",
                     "values": vector,
-                    "metadata": {"chunk_text": chunk, "category": "uploaded_pdf"},
+                    "metadata": {
+                        "chunk_text": chunk,
+                        "category": "uploaded_pdf",
+                        "file_name": file_name }
                 }
             )
 
@@ -90,6 +93,7 @@ def pdf_ingestion_component():
         )
 
         if uploaded_file:
+            st.session_state.uploaded_file_name = uploaded_file.name
             if st.session_state.uploaded_text is None:
                 # Extract and store text (only once)
                 st.session_state.uploaded_text = extract_text_from_pdf(uploaded_file)
@@ -117,7 +121,7 @@ def pdf_ingestion_component():
 
                 # Proceed with upload
                 index = get_pinecone_index()
-                embed_and_upsert(chunks, index)
+                embed_and_upsert(chunks, index,st.session_state.uploaded_file_name)
 
                 # ✅ Save uploaded file to current conversation
                 conv_id = st.session_state.current_conversation_id
