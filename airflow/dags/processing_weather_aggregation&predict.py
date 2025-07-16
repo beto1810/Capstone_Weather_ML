@@ -7,7 +7,7 @@ from airflow.decorators import dag
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 
-dbt_env_vars = load_dotenv("/opt/Weather_ML/.env")
+dbt_env_vars = load_dotenv("/opt/airflow/.env")
 
 
 @dag(
@@ -29,7 +29,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_int_lag_weather_province",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --target airflow --select int_lag_weather_province
+        /home/airflow/.local/bin/dbt run --project-dir . --target airflow --select int_lag_weather_province
     """,
     )
 
@@ -37,7 +37,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_int_weather_province",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --target airflow --select int_weather_province
+        /home/airflow/.local/bin/dbt run --project-dir . --target airflow --select int_weather_province
     """,
     )
 
@@ -45,7 +45,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_fct_weather_province",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --target airflow --select fct_weather_province
+        /home/airflow/.local/bin/dbt run --project-dir . --target airflow --select fct_weather_province
     """,
     )
 
@@ -53,7 +53,7 @@ def dbt_weather_aggregate_prediction():
         task_id="dbt_fct_weather_region",
         bash_command="""
         cd /opt/dbt && \
-        /home/airflow/.local/bin/dbt run --target airflow --select fct_weather_region
+        /home/airflow/.local/bin/dbt run --project-dir . --target airflow --select fct_weather_region
     """,
     )
 
@@ -62,13 +62,17 @@ def dbt_weather_aggregate_prediction():
         python_callable=predict_weather_7day,
     )
 
-    update_int_lag_weather_province >> predict_weather_7days
-
-    (
-        update_int_weather_province
-        >> update_fct_weather_province
-        >> update_fct_weather_region
+    update_predict_weather_province_7days = BashOperator(
+        task_id="dbt_predict_weather_province_7days",
+        bash_command="""
+        cd /opt/dbt && \
+        /home/airflow/.local/bin/dbt run --project-dir . --target airflow --select predict_weather_province_7days
+    """,
     )
+
+    update_int_lag_weather_province >> predict_weather_7days >> update_predict_weather_province_7days
+
+    update_int_weather_province >> update_fct_weather_province >> update_fct_weather_region
 
 
 dag = dbt_weather_aggregate_prediction()

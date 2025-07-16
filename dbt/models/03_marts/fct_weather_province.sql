@@ -34,12 +34,6 @@ SELECT
     e.region,
     e.predicted_condition AS condition,
 
-    {% if is_incremental() %}
-        t.created_at,
-    {% else %}
-        CURRENT_TIMESTAMP() AS created_at,
-    {% endif %}
-
     CURRENT_TIMESTAMP() AS updated_at,
 
     {% if is_incremental() %}

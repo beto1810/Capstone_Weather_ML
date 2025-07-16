@@ -109,10 +109,6 @@ models:
         description: "Predicted weather condition"
         tests:
           - not_null
-      - name: created_at
-        description: "Row creation timestamp"
-        tests:
-          - not_null
       - name: updated_at
         description: "Row last update timestamp"
         tests:
