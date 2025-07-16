@@ -5,7 +5,9 @@
 ) }}
 
 WITH cte AS (
-    SELECT i.*,p.province_name
+    SELECT
+        i.*,
+        p.province_name
     FROM {{ ref('int_weather_province') }} AS i
     INNER JOIN {{ ref('dim_vietnam_provinces') }} AS p
         ON i.province_id = p.province_id

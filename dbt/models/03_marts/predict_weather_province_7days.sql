@@ -4,18 +4,18 @@
 ) }}
 
 SELECT
-    PROVINCE_ID as province_id,
-    REGION as region,
-    PREDICTED_DATE as predicted_date,
-    AVGTEMP_C as avg_temperature_c,
-    MINTEMP_C as min_temperature_c,
-    MAXTEMP_C as max_temperature_c,
-    DAILY_CHANCE_OF_RAIN as daily_chance_of_rain,
-    TOTALPRECIP_MM as total_precip_mm,
-    AVGHUMIDITY as avg_humidity,
-    MAXWIND_KPH as max_wind_kph,
-    MAXWIND_MPH as max_wind_mph,
-    PREDICTED_CONDITION as predicted_condition,
-    CURRENT_TIMESTAMP() as created_at,
-    CURRENT_TIMESTAMP() as updated_at
+    PROVINCE_ID,
+    REGION,
+    PREDICTED_DATE,
+    AVGTEMP_C AS AVG_TEMPERATURE_C,
+    MINTEMP_C AS MIN_TEMPERATURE_C,
+    MAXTEMP_C AS MAX_TEMPERATURE_C,
+    DAILY_CHANCE_OF_RAIN,
+    TOTALPRECIP_MM AS TOTAL_PRECIP_MM,
+    AVGHUMIDITY AS AVG_HUMIDITY,
+    MAXWIND_KPH AS MAX_WIND_KPH,
+    MAXWIND_MPH AS MAX_WIND_MPH,
+    PREDICTED_CONDITION,
+    CURRENT_TIMESTAMP() AS CREATED_AT,
+    CURRENT_TIMESTAMP() AS UPDATED_AT
 FROM {{ source('weather_predictions_7days', 'WEATHER_PREDICTIONS_7DAYS') }}
