@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: raw_weather_data
-    database: KAFKA_AIRFLOW_WEATHER  
+    database: KAFKA_AIRFLOW_WEATHER
     schema: RAW_WEATHER
     description: "Raw weather data collected from WeatherAPI.com for Vietnamese cities"
     tables:
@@ -100,7 +100,7 @@ sources:
               - not_null
 
   - name : vietnam_geo_data
-    database: KAFKA_AIRFLOW_WEATHER  
+    database: KAFKA_AIRFLOW_WEATHER
     schema: VIETNAM_GEO
     description: "List of Vietnamese provinces,cities,district with their codes, names and geographical information"
     tables:
@@ -115,14 +115,14 @@ sources:
           - name: EN_NAME
             description: "Name of the province in English"
             tests:
-              - not_null 
-          
-          - name: VN_NAME 
+              - not_null
+
+          - name: VN_NAME
             description: "Name of the province in Vietnamese"
             tests:
               - not_null
 
-          - name: Latitude  
+          - name: Latitude
             description: "Latitude of the province"
             tests:
               - not_null
@@ -138,7 +138,7 @@ sources:
             description: "District code"
             tests:
               - not_null
-              
+
           - name: Province_Code
             description: "Code of the province to which the district belongs"
             tests:
@@ -147,18 +147,51 @@ sources:
           - name: EN_NAME
             description: "Name of the district in English"
             tests:
-              - not_null 
+              - not_null
 
-          - name: VN_NAME 
+          - name: VN_NAME
             description: "Name of the district in Vietnamese"
             tests:
               - not_null
 
-          - name: Latitude  
+          - name: Latitude
             description: "Latitude of the district"
-      
+
 
           - name: Longitude
             description: "Longitude of the district"
-         
-       
+
+# New source for 7-day weather predictions
+  - name: weather_predictions_7days
+    database: KAFKA_AIRFLOW_WEATHER
+    schema: WEATHER_ANALYTICS
+    description: "7-day weather predictions for Vietnamese cities"
+    tables:
+      - name: WEATHER_PREDICTIONS_7DAYS
+        description: "7-day weather forecast for various cities in Vietnam"
+        columns:
+          - name: PROVINCE_ID
+            description: "Province ID"
+          - name: REGION
+            description: "Region name"
+          - name: PREDICTED_DATE
+            description: "Date of the forecasted weather"
+          - name: AVGTEMP_C
+            description: "Predicted average temperature in Celsius"
+          - name: MINTEMP_C
+            description: "Predicted minimum temperature in Celsius"
+          - name: MAXTEMP_C
+            description: "Predicted maximum temperature in Celsius"
+          - name: DAILY_CHANCE_OF_RAIN
+            description: "Predicted daily chance of rain (%)"
+          - name: TOTALPRECIP_MM
+            description: "Predicted total precipitation in millimeters"
+          - name: AVGHUMIDITY
+            description: "Predicted average humidity (%)"
+          - name: MAXWIND_KPH
+            description: "Predicted maximum wind speed in kilometers per hour"
+          - name: MAXWIND_MPH
+            description: "Predicted maximum wind speed in miles per hour"
+          - name: PREDICTED_CONDITION
+            description: "Predicted weather condition (text)"
+

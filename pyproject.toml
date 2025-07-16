@@ -34,4 +34,5 @@ dependencies = [
     "sqlfluff>=3.4.1",
     "sqlfluff-templater-dbt>=3.4.1",
     "streamlit>=1.46.1",
+    "dateparser>=1.2.2",
 ]

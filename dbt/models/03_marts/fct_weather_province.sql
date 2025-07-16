@@ -5,17 +5,21 @@
 ) }}
 
 WITH cte AS (
-    SELECT i.*
+    SELECT i.*,p.province_name
     FROM {{ ref('int_weather_province') }} AS i
     INNER JOIN {{ ref('dim_vietnam_provinces') }} AS p
         ON i.province_id = p.province_id
     {% if is_incremental() %}
-        WHERE i.weather_date > (SELECT MAX(t.weather_date) FROM {{ this }} AS t)
+        WHERE (
+            (SELECT MAX(t.weather_date) FROM {{ this }} AS t) IS NULL
+            OR i.weather_date > (SELECT MAX(t.weather_date) FROM {{ this }} AS t)
+        )
     {% endif %}
 )
 
 SELECT
     e.province_id,
+    e.province_name,
     e.weather_date,
     e.avg_temperature,
     e.max_temperature,
