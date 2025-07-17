@@ -122,16 +122,4 @@ semantic_models:
       agg_time_dimension: weather_date
 
 
-saved_queries:
-  - name: daily_weather_by_province
-    description: "Show daily weather metrics by province."
-    query_params:
-      group_by:
-        - province_name
-        - weather_date
-        - region
-        - condition
-    exports:
-      - name: weather_snapshot_by_province
-        config:
-          export_as: table
+
