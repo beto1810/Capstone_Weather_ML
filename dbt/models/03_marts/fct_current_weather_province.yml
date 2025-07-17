@@ -132,5 +132,11 @@ metrics:
     description: "Current Weather index by Province"
     type: derived
     type_params:
-      metrics: wind_speed_kph + temperature_celsius + precipitation_mm + humidity_percent+ cloud_cover_percent + uv_index
+      metrics:
+        - wind_speed_kph
+        - temperature_celsius
+        - precipitation_mm
+        - humidity_percent
+        - cloud_cover_percent
+        - uv_index
 
