@@ -94,7 +94,10 @@ saved_queries:
   - name: current_weather_by_region
     description: Show current temperature and condition by region
     query_params:
-        group_by: ['region', 'weather_condition', 'is_daytime']
+        group_by:
+          - region'
+          - 'weather_condition'
+          - 'is_daytime'
     exports:
       - name: weather_snapshot_by_region
         config:
