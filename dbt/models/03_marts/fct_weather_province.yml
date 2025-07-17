@@ -126,7 +126,11 @@ saved_queries:
   - name: daily_weather_by_province
     description: "Show daily weather metrics by province."
     query_params:
-      group_by: [province_name, weather_date, region, condition]
+      group_by:
+        - province_name
+        - weather_date
+        - region
+        - condition
     exports:
       - name: weather_snapshot_by_province
         config:
