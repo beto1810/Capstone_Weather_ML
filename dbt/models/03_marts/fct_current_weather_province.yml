@@ -52,11 +52,11 @@ semantic_models:
         type: categorical
         expr: region
 
-      - name: province name
+      - name: province_name
         type: categorical
         expr: province_name
 
-      - name: weather date
+      - name: weather_date
         type: time
         expr: weather_updated_at
         type_params:

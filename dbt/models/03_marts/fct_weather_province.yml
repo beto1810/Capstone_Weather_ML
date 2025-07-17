@@ -123,7 +123,6 @@ semantic_models:
       agg_time_dimension: weather_date
 
 
-
 saved_queries:
   - name: daily_weather_by_province
     description: "Show daily weather metrics by province."
