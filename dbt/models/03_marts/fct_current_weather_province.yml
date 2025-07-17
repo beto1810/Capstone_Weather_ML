@@ -83,3 +83,12 @@ semantic_models:
         expr: uv_index
     defaults:
       agg_time_dimension: weather_date
+
+metrics:
+  - name: current_weather_province
+    label: "Current Weather index by Province"
+    description: "Current Weather index by Province"
+    type: derived
+    type_params:
+      measure: wind_speed_kph + temperature_celsius + precipitation_mm + humidity_percent+ cloud_cover_percent + uv_index
+
