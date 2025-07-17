@@ -5,7 +5,9 @@ metrics:
     type: simple
     type_params:
       measure: avg_temperature
-      dimensions: [province_name, weather_date]
+      dimensions:
+        - province_name
+        - weather_date
 
   - name: avg_humidity_by_province
     label: "Average Humidity by Province"
@@ -13,12 +15,15 @@ metrics:
     type: simple
     type_params:
       measure: avg_humidity
-      dimensions: [province_name, weather_date]
-
+      dimensions:
+        - province_name
+        - weather_date
   - name: total_precipitation_by_province
     label: "Total Precipitation by Province"
     description: "Total daily precipitation by province and date."
     type: simple
     type_params:
       measure: sum_precipitation
-      dimensions: [province_name, weather_date]
+      dimensions:
+        - province_name
+        - weather_date
