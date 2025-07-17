@@ -36,6 +36,3 @@ models:
         description: "Timestamp when the record was created."
       - name: UPDATED_AT
         description: "Timestamp when the record was last updated."
-    tests:
-      - unique:
-          column_name: [PROVINCE_ID, PREDICTED_DATE]

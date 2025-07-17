@@ -44,7 +44,7 @@ semantic_models:
         agg_time_dimension : weather_updated_at
     entities:
       - name: province
-        type: foreign
+        type: primary
         expr: province_id
 
     dimensions:
