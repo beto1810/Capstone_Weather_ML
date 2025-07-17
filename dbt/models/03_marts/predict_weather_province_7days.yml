@@ -32,6 +32,8 @@ models:
         description: "Predicted maximum wind speed in miles per hour."
       - name: PREDICTED_CONDITION
         description: "Predicted weather condition (e.g., Sunny, Rainy)."
+      - name: is_raining
+        description: "predicted whether days are rainy"
       - name: CREATED_AT
         description: "Timestamp when the record was created."
       - name: UPDATED_AT
@@ -60,6 +62,7 @@ semantic_models:
       - name: predicted_condition
         type: categorical
         expr: PREDICTED_CONDITION
+
     measures:
       - name: predict_avg_temperature_c
         agg: average
@@ -76,7 +79,7 @@ semantic_models:
       - name: predict_total_precip_mm
         agg: sum
         expr: TOTAL_PRECIP_MM
-      - name: predidct_avg_humidity
+      - name: predict_avg_humidity
         agg: average
         expr: AVG_HUMIDITY
       - name: predict_max_wind_kph
@@ -85,5 +88,51 @@ semantic_models:
       - name: predict_max_wind_mph
         agg: max
         expr: MAX_WIND_MPH
+      - name: total_forecast_days
+        agg: count
+        expr: is_raining
+      - name: total_rainy_days
+        agg: sum
+        expr: is_raining
+
+
     defaults:
       agg_time_dimension: predicted_date
+
+metrics:
+  - name: avg_temp_by_region
+    label: "Average Temperature by Region"
+    description: "Average predicted temperature across provinces."
+    type: simple
+    type_params:
+      measure: predict_avg_temperature_c
+
+  - name: total_precip_by_day
+    label: "Total Precipitation by Day"
+    description: "Sum of total precipitation grouped by date."
+    type: simple
+    type_params:
+      measure: predict_total_precip_mm
+
+  - name: count_of_rainy_days
+    label: "Count of Rainy Days"
+    description: "Number of days predicted as rainy."
+    type: simple
+    type_params:
+      measure: total_rainy_days
+
+  - name: count_of_forecast_days
+    label: "Count of Forecast Days"
+    description: "Total number of forecast days."
+    type: simple
+    type_params:
+      measure: total_forecast_days
+
+  - name: rainy_day_percentage
+    label: "Rainy Day Percentage"
+    description: "Ratio of rainy day predictions."
+    type: ratio
+    type_params:
+      numerator: count_of_rainy_days
+      denominator: count_of_forecast_days
+

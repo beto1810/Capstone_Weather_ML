@@ -58,6 +58,8 @@ semantic_models:
         type: categorical
       - name: is_daytime
         type: categorical
+      - name: is_raining
+        type: categorical
       - name: created_at
         type: time
         type_params:
