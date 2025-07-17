@@ -1,6 +1,5 @@
-version: 2
-
 models:
+
   - name: fct_current_weather_province
     description: "{{ doc('weather_data') }}"
     config:
@@ -39,61 +38,46 @@ semantic_models:
   - name: fct_current_weather_province
     model: ref('fct_current_weather_province')
     description: "Weather data by province at the current timestamp"
-
-
     entities:
       - name: province
         type: primary
         expr: province_id
-
     dimensions:
       - name: region
         type: categorical
         expr: region
-
       - name: province_name
         type: categorical
         expr: province_name
-
       - name: weather_date
         type: time
         expr: weather_updated_at
         type_params:
           time_granularity: day
-
       - name: weather_condition
         type: categorical
-
       - name: is_daytime
         type: categorical
-
       - name: created_at
         type: time
         type_params:
           time_granularity: day
-
+    measures:
       - name: wind_speed_kph
-        type: categorical
-
+        agg: max
+        expr: wind_speed_kph
       - name: temperature_celsius
-        type: categorical
-
+        agg: max
+        expr: temperature_celsius
       - name: precipitation_mm
-        type: categorical
-
+        agg: max
+        expr: precipitation_mm
       - name: humidity_percent
-        type: categorical
-
+        agg: max
+        expr: humidity_percent
       - name: cloud_cover_percent
-        type: categorical
-
+        agg: max
+        expr: cloud_cover_percent
       - name: uv_index
-        type: categorical
-
-
-
-
-
-
-
-
+        agg: max
+        expr: uv_index

@@ -118,8 +118,39 @@ semantic_models:
       - name: chance_rain
         agg: average
         expr: chance_rain
+      - name: rainy_day
+        expr: "CASE WHEN sum_precipitation > 0 THEN 1 ELSE 0 END"
+        agg: sum
     defaults:
       agg_time_dimension: weather_date
 
+metrics:
+  - name: avg_temperature_by_province_history
+    label: "Average Temperature by Province"
+    description: "Average daily temperature by province and date."
+    type: simple
+    type_params:
+      measure: avg_temperature
+
+  - name: avg_humidity_by_province_history
+    label: "Average Humidity by Province"
+    description: "Average daily humidity by province and date."
+    type: simple
+    type_params:
+      measure: avg_humidity
+
+  - name: total_precipitation_by_province_history
+    label: "Total Precipitation by Province"
+    description: "Total daily precipitation by province and date."
+    type: simple
+    type_params:
+      measure: sum_precipitation
+
+  - name: rainy_days_by_province
+    label: "Rainy Days by Province"
+    description: "Number of days with rain in each province."
+    type: simple
+    type_params:
+      measure: rainy_day
 
 
