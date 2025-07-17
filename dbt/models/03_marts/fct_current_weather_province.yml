@@ -133,10 +133,10 @@ metrics:
     type: derived
     type_params:
       metrics:
-        - wind_speed_kph
-        - temperature_celsius
-        - precipitation_mm
-        - humidity_percent
-        - cloud_cover_percent
-        - uv_index
+        - metric_wind_speed_kph
+        - metric_temperature_celsius
+        - metric_precipitation_mm
+        - metric_humidity_percent
+        - metric_cloud_cover_percent
+        - metric_uv_index
 
