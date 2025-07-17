@@ -81,3 +81,5 @@ semantic_models:
       - name: uv_index
         agg: max
         expr: uv_index
+    defaults:
+      agg_time_dimension: weather_updated_at
