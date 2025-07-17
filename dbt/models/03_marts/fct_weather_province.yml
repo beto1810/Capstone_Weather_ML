@@ -71,7 +71,6 @@ semantic_models:
   - name: fct_weather_province
     model: ref('fct_weather_province')
     description: "Weather data by province and date."
-    primary_entity: province_date
     entities:
       - name: province_date
         type: primary
