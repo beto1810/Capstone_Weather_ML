@@ -1,0 +1,58 @@
+version: 2
+
+models:
+
+  - name: fct_weather_region
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['fact', 'weather', 'region']
+    columns:
+      - name: region
+        description: "Geographical region name"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vietnam_provinces')
+              field: region
+      - name: weather_date
+        description: "Date of weather measurement"
+        tests:
+          - not_null
+      - name: avg_temperature
+        description: "Average temperature across all provinces in region"
+        tests:
+          - not_null
+      - name: max_temperature
+        description: "Highest temperature recorded in region"
+        tests:
+          - not_null
+      - name: min_temperature
+        description: "Lowest temperature recorded in region"
+        tests:
+          - not_null
+      - name: avg_humidity
+        description: "Average humidity across region"
+        tests:
+          - not_null
+      - name: sum_precipitation
+        description: "Total precipitation across all provinces in region"
+        tests:
+          - not_null
+      - name: chance_rain
+        description: "Indicates if there was any precipitation in the region (0 or 1)"
+      - name: avg_wind_kph
+        description: "Average wind speed across region"
+        tests:
+          - not_null
+      - name: avg_wind_mph
+        description: "Average wind speed in mph across region"
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Row last update timestamp"
+        tests:
+          - not_null
+
+
+
+

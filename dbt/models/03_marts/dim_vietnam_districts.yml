@@ -1,0 +1,26 @@
+models:
+
+  - name: dim_vietnam_districts
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['dimension']
+    columns:
+      - name: district_id
+        description: "Surrogate key for district"
+        tests:
+          - unique
+          - not_null
+      - name: province_id
+        description: "Foreign key to dim_vietnam_provinces"
+      - name: district_name
+        description: "District name"
+      - name: district_name_vn
+        description: "District name in Vietnamese"
+      - name: latitude
+        description: "Latitude of the district"
+      - name: longitude
+        description: "Longitude of the district"
+      - name: updated_at
+        description: "Row last update timestamp"
+      - name: created_at
+        description: "Row creation timestamp"

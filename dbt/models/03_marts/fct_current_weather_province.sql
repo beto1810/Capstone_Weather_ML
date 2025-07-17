@@ -15,6 +15,10 @@ SELECT
     uv_index,
     is_daytime,
     weather_condition,
+    CASE
+        WHEN LOWER(weather_condition) LIKE '%rain%' THEN TRUE
+        ELSE FALSE
+    END AS is_raining,
     CURRENT_TIMESTAMP() AS created_at
 
 FROM {{ ref('int_current_weather_province') }}

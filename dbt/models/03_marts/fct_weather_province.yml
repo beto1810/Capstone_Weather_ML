@@ -1,0 +1,68 @@
+models:
+
+  - name: fct_weather_province
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['fact', 'weather', 'province']
+    columns:
+      - name: province_id
+        description: "Foreign key to dim_vietnam_provinces"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vietnam_provinces')
+              field: province_id
+      - name: province_name
+        description: "Name of the province"
+        tests:
+          - not_null
+      - name: weather_date
+        description: "Date of weather measurement"
+        tests:
+          - not_null
+      - name: avg_temperature
+        description: "Average daily temperature in Celsius"
+        tests:
+          - not_null
+      - name: max_temperature
+        description: "Maximum daily temperature in Celsius"
+        tests:
+          - not_null
+      - name: min_temperature
+        description: "Minimum daily temperature in Celsius"
+        tests:
+          - not_null
+      - name: sum_precipitation
+        description: "Total daily precipitation in mm"
+        tests:
+          - not_null
+      - name: chance_rain
+        description: "Probability of rain (0-1)"
+      - name: avg_humidity
+        description: "Average daily humidity percentage"
+        tests:
+          - not_null
+      - name: avg_wind_kph
+        description: "Average wind speed in km/h"
+        tests:
+          - not_null
+      - name: avg_wind_mph
+        description: "Average wind speed in mph"
+        tests:
+          - not_null
+      - name: region
+        description: "Geographical region"
+        tests:
+          - not_null
+      - name: condition
+        description: "Predicted weather condition"
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Row last update timestamp"
+        tests:
+          - not_null
+      - name: is_new_row
+        description: "Indicates if this is a new row in the incremental model"
+        tests:
+          - not_null

@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: predict_weather_province_7days
+    description: "Predicted weather metrics for each province for the next 7 days. Includes temperature, precipitation, humidity, wind, and predicted condition."
+    columns:
+      - name: PROVINCE_ID
+        description: "Unique identifier for the province."
+        tests:
+          - not_null
+      - name: REGION
+        description: "Region to which the province belongs."
+      - name: PREDICTED_DATE
+        description: "Date for which the weather is predicted."
+        tests:
+          - not_null
+      - name: AVG_TEMPERATURE_C
+        description: "Predicted average temperature in Celsius."
+      - name: MIN_TEMPERATURE_C
+        description: "Predicted minimum temperature in Celsius."
+      - name: MAX_TEMPERATURE_C
+        description: "Predicted maximum temperature in Celsius."
+      - name: DAILY_CHANCE_OF_RAIN
+        description: "Predicted daily chance of rain (percentage)."
+      - name: TOTAL_PRECIP_MM
+        description: "Predicted total precipitation in millimeters."
+      - name: AVG_HUMIDITY
+        description: "Predicted average humidity (percentage)."
+      - name: MAX_WIND_KPH
+        description: "Predicted maximum wind speed in kilometers per hour."
+      - name: MAX_WIND_MPH
+        description: "Predicted maximum wind speed in miles per hour."
+      - name: PREDICTED_CONDITION
+        description: "Predicted weather condition (e.g., Sunny, Rainy)."
+      - name: CREATED_AT
+        description: "Timestamp when the record was created."
+      - name: UPDATED_AT
+        description: "Timestamp when the record was last updated."
+    tests:
+      - unique:
+          column_name: [PROVINCE_ID, PREDICTED_DATE]

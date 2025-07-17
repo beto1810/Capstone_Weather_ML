@@ -1,0 +1,109 @@
+version: 2
+
+models:
+  - name: fct_current_weather_province
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['fact', 'weather', 'province', 'current']
+    columns:
+      - name: province_id
+        description: "Foreign key to dim_vietnam_provinces"
+        tests:
+          - not_null
+      - name: region
+        description: "Geographical region"
+      - name: province_name
+        description: "Name of the province"
+      - name: weather_updated_at
+        description: "Timestamp of weather update"
+      - name: wind_speed_kph
+        description: "Wind speed in km/h"
+      - name: temperature_celsius
+        description: "Temperature in Celsius"
+      - name: precipitation_mm
+        description: "Precipitation in mm"
+      - name: humidity_percent
+        description: "Humidity percentage"
+      - name: cloud_cover_percent
+        description: "Cloud cover percentage"
+      - name: uv_index
+        description: "UV index"
+      - name: is_daytime
+        description: "Indicates if it is daytime (boolean)"
+      - name: weather_condition
+        description: "Current weather condition (e.g., Rain, Clear)"
+      - name: created_at
+        description: "Row creation timestamp"
+
+semantic_models:
+  - name: fct_current_weather_province
+    model: ref('fct_current_weather_province')
+    description: "Weather data by province at the current timestamp"
+
+    defaults:
+        agg_time_dimension : weather_updated_at
+    entities:
+      - name: province
+        type: foreign
+        expr: province_id
+
+    dimensions:
+      - name: region
+        type: categorical
+        expr: region
+
+      - name: province name
+        type: categorical
+        expr: province_name
+
+      - name: weather date
+        type: time
+        expr: weather_updated_at
+        type_params:
+          time_granularity: day
+
+      - name: weather_condition
+        type: categorical
+
+      - name: is_daytime
+        type: categorical
+
+      - name: created_at
+        type: time
+        type_params:
+          time_granularity: day
+
+      - name: wind_speed_kph
+        type: categorical
+
+      - name: temperature_celsius
+        type: categorical
+
+      - name: precipitation_mm
+        type: categorical
+
+      - name: humidity_percent
+        type: categorical
+
+      - name: cloud_cover_percent
+        type: categorical
+
+      - name: uv_index
+        type: categorical
+
+saved_queries:
+  - name: current_weather_by_region
+    description: Show current temperature and condition by region
+    query_params:
+        group_by: ['region', 'weather_condition', 'is_daytime']
+    exports:
+      - name: weather_snapshot_by_region
+        config:
+          export_as: table
+
+
+
+
+
+
+

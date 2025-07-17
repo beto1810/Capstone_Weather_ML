@@ -1,0 +1,27 @@
+models:
+  - name: dim_vietnam_provinces
+    description: "{{ doc('weather_data') }}"
+    config:
+      tags: ['dimension']
+    columns:
+      - name: province_id
+        description: "Surrogate key"
+        tests:
+          - unique
+          - not_null
+      - name: province_name
+        description: "Province name"
+      - name: province_name_vn
+        description: "Province name in Vietnamese"
+      - name: latitude
+        description: "Latitude of the province"
+      - name: longitude
+        description: "Longitude of the province"
+      - name: region
+        description: "Geographical region"
+      - name: updated_at
+        description: "Row last update timestamp"
+      - name: created_at
+        description: "Row creation timestamp"
+
+
