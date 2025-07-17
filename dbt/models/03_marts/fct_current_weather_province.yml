@@ -85,10 +85,52 @@ semantic_models:
       agg_time_dimension: weather_date
 
 metrics:
+  - name: metric_wind_speed_kph
+    type: simple
+    label: "Max Wind Speed"
+    description: "Maximum wind speed in KPH"
+    type_params:
+      measure: wind_speed_kph
+
+  - name: metric_temperature_celsius
+    type: simple
+    label: "Max Temperature"
+    description: "Maximum temperature in Celsius"
+    type_params:
+      measure: temperature_celsius
+
+  - name: metric_precipitation_mm
+    type: simple
+    label: "Max Precipitation"
+    description: "Maximum precipitation in mm"
+    type_params:
+      measure: precipitation_mm
+
+  - name: metric_humidity_percent
+    type: simple
+    label: "Max Humidity"
+    description: "Maximum humidity percentage"
+    type_params:
+      measure: humidity_percent
+
+  - name: metric_cloud_cover_percent
+    type: simple
+    label: "Max Cloud Cover"
+    description: "Maximum cloud cover percentage"
+    type_params:
+      measure: cloud_cover_percent
+
+  - name: metric_uv_index
+    type: simple
+    label: "Max UV Index"
+    description: "Maximum UV index"
+    type_params:
+      measure: uv_index
+
   - name: current_weather_province
     label: "Current Weather index by Province"
     description: "Current Weather index by Province"
     type: derived
     type_params:
-      measure: wind_speed_kph + temperature_celsius + precipitation_mm + humidity_percent+ cloud_cover_percent + uv_index
+      metrics: wind_speed_kph + temperature_celsius + precipitation_mm + humidity_percent+ cloud_cover_percent + uv_index
 
