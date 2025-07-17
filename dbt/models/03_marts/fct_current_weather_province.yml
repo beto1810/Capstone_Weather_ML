@@ -40,8 +40,7 @@ semantic_models:
     model: ref('fct_current_weather_province')
     description: "Weather data by province at the current timestamp"
 
-    defaults:
-        agg_time_dimension : weather_updated_at
+
     entities:
       - name: province
         type: primary
