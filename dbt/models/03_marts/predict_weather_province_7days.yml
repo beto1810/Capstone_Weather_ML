@@ -36,3 +36,54 @@ models:
         description: "Timestamp when the record was created."
       - name: UPDATED_AT
         description: "Timestamp when the record was last updated."
+
+semantic_models:
+  - name: predict_weather_province_7days
+    model: ref('predict_weather_province_7days')
+    description: "Predicted weather metrics for each province for the next 7 days. Includes temperature, precipitation, humidity, wind, and predicted condition."
+    entities:
+      - name: province_predicted_date
+        type: primary
+        expr: "PROVINCE_ID || '-' || PREDICTED_DATE"
+      - name: province
+        type: foreign
+        expr: PROVINCE_ID
+    dimensions:
+      - name: region
+        type: categorical
+        expr: REGION
+      - name: predicted_date
+        type: time
+        expr: PREDICTED_DATE
+        type_params:
+          time_granularity: day
+      - name: predicted_condition
+        type: categorical
+        expr: PREDICTED_CONDITION
+    measures:
+      - name: avg_temperature_c
+        agg: average
+        expr: AVG_TEMPERATURE_C
+      - name: min_temperature_c
+        agg: min
+        expr: MIN_TEMPERATURE_C
+      - name: max_temperature_c
+        agg: max
+        expr: MAX_TEMPERATURE_C
+      - name: daily_chance_of_rain
+        agg: average
+        expr: DAILY_CHANCE_OF_RAIN
+      - name: total_precip_mm
+        agg: sum
+        expr: TOTAL_PRECIP_MM
+      - name: avg_humidity
+        agg: average
+        expr: AVG_HUMIDITY
+      - name: max_wind_kph
+        agg: max
+        expr: MAX_WIND_KPH
+      - name: max_wind_mph
+        agg: max
+        expr: MAX_WIND_MPH
+    defaults:
+      agg_time_dimension: predicted_date
