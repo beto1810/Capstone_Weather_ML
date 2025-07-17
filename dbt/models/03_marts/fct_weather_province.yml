@@ -66,3 +66,70 @@ models:
         description: "Indicates if this is a new row in the incremental model"
         tests:
           - not_null
+
+semantic_models:
+  - name: fct_weather_province
+    model: ref('fct_weather_province')
+    description: "Weather data by province and date."
+    primary_entity: province_date
+    entities:
+      - name: province_date
+        type: primary
+        expr: "province_id || '-' || weather_date"
+      - name: province
+        type: foreign
+        expr: province_id
+    dimensions:
+      - name: province_name
+        type: categorical
+        expr: province_name
+      - name: weather_date
+        type: time
+        expr: weather_date
+        type_params:
+          time_granularity: day
+      - name: region
+        type: categorical
+        expr: region
+      - name: condition
+        type: categorical
+        expr: condition
+    measures:
+      - name: avg_temperature
+        agg: average
+        expr: avg_temperature
+      - name: max_temperature
+        agg: max
+        expr: max_temperature
+      - name: min_temperature
+        agg: min
+        expr: min_temperature
+      - name: sum_precipitation
+        agg: sum
+        expr: sum_precipitation
+      - name: avg_humidity
+        agg: average
+        expr: avg_humidity
+      - name: avg_wind_kph
+        agg: average
+        expr: avg_wind_kph
+      - name: avg_wind_mph
+        agg: average
+        expr: avg_wind_mph
+      - name: chance_rain
+        agg: average
+        expr: chance_rain
+    defaults:
+      agg_time_dimension: weather_date
+
+
+
+saved_queries:
+  - name: daily_weather_by_province
+    description: "Show daily weather metrics by province."
+    query_params:
+      group_by: [province_name, weather_date, region, condition]
+    exports:
+      - name: weather_snapshot_by_province
+        config:
+          export_as: table
