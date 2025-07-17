@@ -149,7 +149,7 @@ saved_queries:
       metrics:
         - current_weather_province
       group_by:
-        - province_name
+        - Dimension('customer')
     exports:
       - name: current_weather_summary
         config:
