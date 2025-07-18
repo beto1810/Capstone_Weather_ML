@@ -55,10 +55,11 @@ def embed_and_upsert(chunks, index,file_name:str):
     with st.spinner("Embedding and uploading to Pinecone..."):
         vectors = []
         for i, chunk in enumerate(chunks):
+            chunk_id = f"chunk-{uuid.uuid4()}"
             vector = embedder.embed_query(chunk)
             vectors.append(
                 {
-                    "id": f"chunk-{uuid.uuid4()}",
+                    "id": chunk_id,
                     "values": vector,
                     "metadata": {
                         "chunk_text": chunk,
