@@ -142,7 +142,7 @@ metrics:
         - metric_cloud_cover_percent
         - metric_uv_index
 
-saved_queries:
+saved_query:
   - name: current_weather_summary
     description: "Summary of current weather by province, including max temperature and precipitation."
     query_params:

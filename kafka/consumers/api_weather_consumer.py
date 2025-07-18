@@ -5,7 +5,7 @@ import os
 import time
 from dotenv import load_dotenv
 from snowflake.connector import connect
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer # type: ignore
 
 
 BATCH_SIZE = 50  # You can adjust this

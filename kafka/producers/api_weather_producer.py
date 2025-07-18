@@ -224,5 +224,4 @@ if __name__ == "__main__":
                 logger.info("Total messages produced: %d", total_messages)
         except Exception as e:
             logger.error("Failed to produce messages: %s", str(e))
-            sys.exit(1)
         time.sleep(900)
