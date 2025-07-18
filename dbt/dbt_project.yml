@@ -26,6 +26,9 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
+dbt-cloud:
+    project-id: 70471823488062
+
 # Add model configurations
 models:
   dbt_weather:

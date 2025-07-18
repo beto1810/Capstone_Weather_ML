@@ -8,7 +8,7 @@ import requests
 import snowflake.connector
 from dotenv import load_dotenv
 
-from kafka import KafkaProducer
+from kafka import KafkaProducer # type: ignore
 from kafka.errors import KafkaError
 
 load_dotenv()
@@ -72,7 +72,7 @@ def get_cities_from_snowflake():
 
         cursor.execute(query)
         cities_df = pd.DataFrame(
-            cursor.fetchall(), columns=["province_name", "latitude", "longitude"]
+            cursor.fetchall(), columns=["province_name", "latitude", "longitude"] # type: ignore
         )
 
         logger.info(f"Loaded {len(cities_df['province_name'])} cities from Snowflake")
@@ -100,6 +100,12 @@ def fetch_data_from_api(latitude, longitude):
 
 
 def produce_messages(cities, max_retries=3, timeout=10):
+    import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo("Asia/Bangkok")
+    except ImportError:
+        tz = None
     bootstrap_servers = os.getenv("KAFKA_BROKER", "kafka:9092")
 
     producer = KafkaProducer(
@@ -124,8 +130,14 @@ def produce_messages(cities, max_retries=3, timeout=10):
                     data_weather = data["current"]
                     data_weather["province_name"] = province
 
+                    # Add current_time in GMT+7 for logging only
+                    if tz:
+                        current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        current_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%Y-%m-%d %H:%M:%S")
+
                     logger.info(
-                        f"Sending data for {data_weather['province_name']}..."
+                        f"Sending data for {data_weather['province_name']} at {current_time} (GMT+7)..."
                     )
 
                     # Send with increased timeout
@@ -156,7 +168,7 @@ def produce_messages(cities, max_retries=3, timeout=10):
                         logger.info(f"Retrying... ({retries}/{max_retries})")
                         time.sleep(1)  # Wait before retry
 
-            time.sleep(0.3)  # Wait between cities
+            time.sleep(1)  # Wait between cities
 
         logger.info("Finished processing all cities.")
         return messages_processed

@@ -11,7 +11,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langchain.prompts import PromptTemplate
 from langgraph.graph.message import MessagesState
-from pdf_ingest import pdf_ingestion_component
+from pdf_ingest import pdf_ingestion_component # type: ignore
 from pinecone import Pinecone
 from langchain_community.chat_models import ChatOpenAI
 from langchain.tools import tool
@@ -62,12 +62,12 @@ def search_similar_chunks(query: str) -> str:
         top_k=TOP_K_RESULTS,
         include_metadata=True,
     )
-    if results["matches"]:
+    if results["matches"]: # type: ignore
         formatted_chunks = []
         sources = set()
         file_names = set()
 
-        for chunk in results["matches"]:
+        for chunk in results["matches"]: # type: ignore
             meta = chunk["metadata"]
             chunk_text = meta.get("chunk_text", "").strip()
             file_name = meta.get("file_name", "Unknown file")
@@ -122,106 +122,27 @@ Provide a clear and accurate response based on this context whenever possible an
 
 
 @tool
-def query_snowflake_weather(query: str) -> str:
+def query_current_weather(query: str) -> str:
     """
-    Handles weather queries for current, past, or future weather from Snowflake.
-    Determines correct table and filters based on location and time.
+    Handles queries for current weather from Snowflake.
+    Extracts city/province and fetches current weather only.
     """
-
     llm = ChatOpenAI(model=st.session_state.model_name, temperature=0.7)
 
-    # --- Extract city/province ---
     def extract_location_with_llm(query: str) -> str:
         prompt = PromptTemplate.from_template(
             "Extract the city or province name from this query: {query}\nJust return the name only."
         )
-        return llm.invoke(prompt.format(query=query)).content.strip()
-
-    # --- Extract date/time ---
-    def extract_date_with_llm(query: str) -> str:
-        prompt = PromptTemplate.from_template(
-            "Extract the date or time reference from this query: {query}\n"
-            "Return only the time-related expression like 'yesterday', 'July 2nd', 'today', 'now', etc."
-        )
-        return llm.invoke(prompt.format(query=query)).content.strip()
+        result = llm.invoke(prompt.format(query=query)).content
+        if isinstance(result, list):
+            return str(result[0])
+        return str(result).strip()
 
     city = extract_location_with_llm(query)
-    date_filter = extract_date_with_llm(query)
-    parsed_date = dateparser.parse(date_filter)
-
-    # --- Detect 'next X days' or 'in X days' for forecast range ---
-    forecast_days = None
-    forecast_start = None
-    forecast_end = None
-    weekend_dates = None
-    next_days_match = re.search(r"next (\d+) days", date_filter.lower())
-    in_days_match = re.search(r"in (\d+) days", date_filter.lower())
-    if next_days_match:
-        forecast_days = int(next_days_match.group(1))
-    elif in_days_match:
-        forecast_days = int(in_days_match.group(1))
-    elif "weekend" in date_filter.lower():
-        # Find next Saturday and Sunday
-        today_weekday = datetime.now().weekday()  # Monday=0, Sunday=6
-        days_until_saturday = (5 - today_weekday) % 7
-        days_until_sunday = (6 - today_weekday) % 7
-        next_saturday = datetime.now().date() + timedelta(days=days_until_saturday)
-        next_sunday = datetime.now().date() + timedelta(days=days_until_sunday)
-        weekend_dates = [next_saturday, next_sunday]
-
-    # --- Decide which table to query ---
     FCT_CURRENT = "FCT_CURRENT_WEATHER_PROVINCE"
-    FCT_HISTORY = "FCT_WEATHER_PROVINCE"
-    FCT_FORECAST = "PREDICT_WEATHER_PROVINCE_7DAYS"
-
-    today = datetime.now().date()
-    table_name = FCT_CURRENT  # Default
-
-    if forecast_days:
-        table_name = FCT_FORECAST
-        if forecast_start is None:
-            forecast_start = datetime.now().date() + timedelta(days=1)
-        if forecast_end is None:
-            forecast_end = forecast_start + timedelta(days=forecast_days - 1)
-    elif weekend_dates:
-        table_name = FCT_FORECAST
-    elif parsed_date:
-        date_only = parsed_date.date()
-        if date_only > today:
-            table_name = FCT_FORECAST
-        elif date_only < today:
-            table_name = FCT_HISTORY
-        else:
-            table_name = FCT_CURRENT
-    else:
-        if date_filter.lower() in ["forecast", "tomorrow", "next week","next"]:
-            table_name = FCT_FORECAST
-        elif date_filter.lower() in ["yesterday", "last week", "last month"]:
-            table_name = FCT_HISTORY
-        else:
-            table_name = FCT_CURRENT
-
-    # --- Build SQL query ---
-    sql = f"SELECT {table_name}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {table_name} JOIN DIM_VIETNAM_PROVINCES ON {table_name}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID   WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
+    sql = f"SELECT {FCT_CURRENT}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {FCT_CURRENT} JOIN DIM_VIETNAM_PROVINCES ON {FCT_CURRENT}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
     params = [city]
 
-    if forecast_days:
-        # Query for a range of forecast days
-        if forecast_start is not None and forecast_end is not None:
-            sql += " AND predicted_date >= %s AND predicted_date <= %s"
-            params.append(forecast_start.strftime("%Y-%m-%d"))
-            params.append(forecast_end.strftime("%Y-%m-%d"))
-    elif weekend_dates:
-        # Query for both Saturday and Sunday
-        sql += " AND predicted_date IN (%s, %s)"
-        params.append(weekend_dates[0].strftime("%Y-%m-%d"))
-        params.append(weekend_dates[1].strftime("%Y-%m-%d"))
-    elif parsed_date and table_name != FCT_CURRENT:
-        date_column = "predicted_date" if table_name == FCT_FORECAST else "created_at"
-        sql += f" AND {date_column} = %s"
-        params.append(parsed_date.strftime("%Y-%m-%d"))
-
-    # --- Connect to Snowflake ---
     conn = snowflake.connector.connect(
         user=os.getenv("SNOWFLAKE_USER"),
         password=os.getenv("SNOWFLAKE_PASSWORD"),
@@ -231,54 +152,165 @@ def query_snowflake_weather(query: str) -> str:
         schema=os.getenv("SNOWFLAKE_SCHEMA"),
         role=os.getenv("SNOWFLAKE_ROLE", "USER_DBT_ROLE"),
     )
-
     cursor = conn.cursor()
     try:
         cursor.execute(sql, params)
         rows = cursor.fetchall()
+        headers = [col[0] for col in cursor.description]
     finally:
         cursor.close()
         conn.close()
 
-    # --- Format result ---
     if not rows:
-        return f"No weather data found for **{city}** on **{date_filter or 'today'}**."
-
-    headers = [col[0] for col in cursor.description]
+        return f"No current weather data found for **{city}**."
     formatted = [dict(zip(headers, row)) for row in rows]
-
-    preview = formatted[:3]  # Limit preview
-    response = f"Here is the weather data for **{city}** on **{date_filter or 'today'}** from table `{table_name}`:\n\n"
+    preview = formatted[:3]
+    response = f"Here is the current weather data for **{city}** from table `{FCT_CURRENT}`:\n\n"
     for row in preview:
         for key, val in row.items():
             response += f"- {key}: {val}\n"
         response += "\n"
-
     if len(formatted) > 3:
         response += f"... and {len(formatted) - 3} more rows."
+    return response
 
-    # Add last update info with clear date and time
-    # Try WEATHER_UPDATED_AT first, then fallback to created_at
-    update_col = None
-    if formatted and ("WEATHER_UPDATED_AT" in formatted[0]):
-        update_col = "WEATHER_UPDATED_AT"
-    elif formatted and ("created_at" in formatted[0]):
-        update_col = "created_at"
 
-    if update_col:
-        update_times = [row.get(update_col) for row in formatted if row.get(update_col)]
-        if update_times:
-            try:
-                # Try to sort as datetimes, fallback to string sort
-                from dateutil.parser import parse as dtparse
-                update_times_dt = [dtparse(str(t)) for t in update_times]
-                most_recent = max(update_times_dt)
-                formatted_time = most_recent.strftime("%Y-%m-%d %H:%M:%S")
-            except Exception:
-                most_recent = max(update_times)
-                formatted_time = str(most_recent)
-            response += f"\n**Last update:** {formatted_time}"
+@tool
+def query_past_weather(query: str) -> str:
+    """
+    Handles queries for past weather from Snowflake.
+    Extracts city/province and date, fetches historical weather.
+    """
+    llm = ChatOpenAI(model=st.session_state.model_name, temperature=0.7)
 
+    def extract_location_with_llm(query: str) -> str:
+        prompt = PromptTemplate.from_template(
+            "Extract the city or province name from this query: {query}\nJust return the name only."
+        )
+        result = llm.invoke(prompt.format(query=query)).content
+        if isinstance(result, list):
+            return str(result[0])
+        return str(result).strip()
+
+    def extract_date_with_llm(query: str) -> str:
+        prompt = PromptTemplate.from_template(
+            "Extract the date or time reference from this query: {query}\nReturn only the time-related expression like 'yesterday', 'July 2nd', etc."
+        )
+        result = llm.invoke(prompt.format(query=query)).content
+        if isinstance(result, list):
+            return str(result[0])
+        return str(result).strip()
+
+    city = extract_location_with_llm(query)
+    date_filter = extract_date_with_llm(query)
+    parsed_date = dateparser.parse(date_filter)
+    FCT_HISTORY = "FCT_WEATHER_PROVINCE"
+    sql = f"SELECT {FCT_HISTORY}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {FCT_HISTORY} JOIN DIM_VIETNAM_PROVINCES ON {FCT_HISTORY}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
+    params = [city]
+    if parsed_date:
+        sql += " AND weather_date = %s"
+        params.append(parsed_date.strftime("%Y-%m-%d"))
+    conn = snowflake.connector.connect(
+        user=os.getenv("SNOWFLAKE_USER"),
+        password=os.getenv("SNOWFLAKE_PASSWORD"),
+        account=os.getenv("SNOWFLAKE_ACCOUNT"),
+        warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
+        database=os.getenv("SNOWFLAKE_DATABASE"),
+        schema=os.getenv("SNOWFLAKE_SCHEMA"),
+        role=os.getenv("SNOWFLAKE_ROLE", "USER_DBT_ROLE"),
+    )
+    cursor = conn.cursor()
+    try:
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+        headers = [col[0] for col in cursor.description]
+    finally:
+        cursor.close()
+        conn.close()
+    if not rows:
+        return f"No past weather data found for **{city}** on **{date_filter}**."
+    formatted = [dict(zip(headers, row)) for row in rows]
+    preview = formatted[:3]
+    response = f"Here is the past weather data for **{city}** on **{date_filter}** from table `{FCT_HISTORY}`:\n\n"
+    for row in preview:
+        for key, val in row.items():
+            response += f"- {key}: {val}\n"
+        response += "\n"
+    if len(formatted) > 3:
+        response += f"... and {len(formatted) - 3} more rows."
+    return response
+
+
+@tool
+def query_predict_weather(query: str) -> str:
+    """
+    Handles queries for future weather (forecast) from Snowflake.
+    Extracts city/province and date, fetches forecast weather.
+    """
+    llm = ChatOpenAI(model=st.session_state.model_name, temperature=0.7)
+
+    def extract_location_with_llm(query: str) -> str:
+        prompt = PromptTemplate.from_template(
+            "Extract the city or province name from this query: {query}\nJust return the name only."
+        )
+        result = llm.invoke(prompt.format(query=query)).content
+        if isinstance(result, list):
+            return str(result[0])
+        return str(result).strip()
+
+    def extract_date_with_llm(query: str) -> str:
+        prompt = PromptTemplate.from_template(
+            "Extract the date or time reference from this query: {query}\nReturn only the time-related expression like 'tomorrow', 'next week', etc."
+        )
+        result = llm.invoke(prompt.format(query=query)).content
+        if isinstance(result, list):
+            return str(result[0])
+        return str(result).strip()
+
+    city = extract_location_with_llm(query)
+    date_filter = extract_date_with_llm(query)
+    parsed_date = dateparser.parse(date_filter)
+    if not parsed_date:
+        # Try to parse date directly from the query if LLM fails
+        parsed_date = dateparser.parse(query)
+        if parsed_date:
+            date_filter = parsed_date.strftime("%Y-%m-%d")
+        else:
+            date_filter = "unknown"
+    FCT_FORECAST = "PREDICT_WEATHER_PROVINCE_7DAYS"
+    sql = f"SELECT {FCT_FORECAST}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {FCT_FORECAST} JOIN DIM_VIETNAM_PROVINCES ON {FCT_FORECAST}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
+    params = [city]
+    if parsed_date:
+        sql += " AND predicted_date = %s"
+        params.append(parsed_date.strftime("%Y-%m-%d"))
+    conn = snowflake.connector.connect(
+        user=os.getenv("SNOWFLAKE_USER"),
+        password=os.getenv("SNOWFLAKE_PASSWORD"),
+        account=os.getenv("SNOWFLAKE_ACCOUNT"),
+        warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
+        database=os.getenv("SNOWFLAKE_DATABASE"),
+        schema=os.getenv("SNOWFLAKE_SCHEMA"),
+        role=os.getenv("SNOWFLAKE_ROLE", "USER_DBT_ROLE"),
+    )
+    cursor = conn.cursor()
+    try:
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+        headers = [col[0] for col in cursor.description]
+    finally:
+        cursor.close()
+        conn.close()
+    if not rows:
+        return f"No forecast weather data found for **{city}** on **{date_filter}**."
+    formatted = [dict(zip(headers, row)) for row in rows]
+    preview = formatted[:3]
+    response = f"Here is the forecast weather data for **{city}** on **{date_filter}** from table `{FCT_FORECAST}`:\n\n"
+    for row in preview:
+        for key, val in row.items():
+            response += f"- {key}: {val}\n"
+        response += "\n"
+    if len(formatted) > 3:
+        response += f"... and {len(formatted) - 3} more rows."
     return response
 
 
@@ -293,7 +325,7 @@ def create_rag_chatbot(model_name: str = DEFAULT_MODEL):
     llm_model = ChatOpenAI(model=model_name, temperature=0.7)
 
     agent = initialize_agent(
-            tools = [search_similar_chunks,query_snowflake_weather] ,
+            tools = [search_similar_chunks, query_current_weather, query_past_weather, query_predict_weather] ,
             llm  = llm_model,
             agent_type = AgentType.OPENAI_FUNCTIONS,
             verbose =True
