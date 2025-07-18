@@ -16,10 +16,7 @@ SELECT
     MAXWIND_KPH AS MAX_WIND_KPH,
     MAXWIND_MPH AS MAX_WIND_MPH,
     PREDICTED_CONDITION,
-    CASE
-        WHEN LOWER(PREDICTED_CONDITION) LIKE '%rain%' THEN TRUE
-        ELSE FALSE
-    END AS is_raining,
-    CURRENT_TIMESTAMP() AS CREATED_AT,
-    CURRENT_TIMESTAMP() AS UPDATED_AT
+    coalesce(lower(PREDICTED_CONDITION) LIKE '%rain%', FALSE) AS IS_RAINING,
+    current_timestamp() AS CREATED_AT,
+    current_timestamp() AS UPDATED_AT
 FROM {{ source('weather_predictions_7days', 'WEATHER_PREDICTIONS_7DAYS') }}
