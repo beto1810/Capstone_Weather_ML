@@ -1,3 +1,7 @@
+"""
+Kafka producer for weather data ingestion.
+Fetches city data from Snowflake, queries weather API, and produces messages to Kafka.
+"""
 import json
 import logging
 import os
@@ -54,15 +58,10 @@ def get_cities_from_snowflake():
 
         cursor = conn.cursor()
 
-        print(user := os.getenv("SNOWFLAKE_USER"))
-        print(account := os.getenv("SNOWFLAKE_ACCOUNT"))
-        print(warehouse := os.getenv("SNOWFLAKE_WAREHOUSE"))
-        print(database := os.getenv("SNOWFLAKE_DATABASE"))
-        print(schema := os.getenv("SNOWFLAKE_SCHEMA"))
-        print(role := "USER_DBT_ROLE")
-        logger.info("Connecting to Snowflake as user %s on account %s", user, account)
-
-        print("connected to Snowflake successfully")
+        logger.info(
+            "Connecting to Snowflake as user %s on account %s", os.getenv("SNOWFLAKE_USER"), os.getenv("SNOWFLAKE_ACCOUNT")
+        )
+        logger.info("Connected to Snowflake successfully")
 
         # Fetch cities data
         query = """
@@ -75,11 +74,11 @@ def get_cities_from_snowflake():
             cursor.fetchall(), columns=["province_name", "latitude", "longitude"] # type: ignore
         )
 
-        logger.info(f"Loaded {len(cities_df['province_name'])} cities from Snowflake")
+        logger.info("Loaded %d cities from Snowflake", len(cities_df["province_name"]))
         return cities_df
 
     except Exception as e:
-        logger.error(f"Failed to fetch cities from Snowflake: {str(e)}")
+        logger.error("Failed to fetch cities from Snowflake: %s", str(e))
         raise
     finally:
         if "conn" in locals():
@@ -87,19 +86,23 @@ def get_cities_from_snowflake():
 
 
 def fetch_data_from_api(latitude, longitude):
-    API_KEY = os.getenv("WEATHER_API_KEY")
-    if not API_KEY:
+    """Fetch weather data from the API for given latitude and longitude."""
+    api_key = os.getenv("WEATHER_API_KEY")
+    if not api_key:
         raise ValueError(
             "API key not found. Please set the WEATHER_API_KEY environment variable."
         )
 
-    weather_url = f"https://api.weatherapi.com/v1/current.json?key={API_KEY}&q={latitude},{longitude}&aqi=no"
-    response = requests.get(weather_url)
+    weather_url = (
+        f"https://api.weatherapi.com/v1/current.json?key={api_key}&q={latitude},{longitude}&aqi=no"
+    )
+    response = requests.get(weather_url, timeout=10)
     response.raise_for_status()
     return response.json()  # Expecting a list of events
 
 
 def produce_messages(cities, max_retries=3, timeout=10):
+    """Produce weather data messages to Kafka for each city."""
     import datetime
     try:
         from zoneinfo import ZoneInfo
@@ -117,7 +120,7 @@ def produce_messages(cities, max_retries=3, timeout=10):
         max_block_ms=30000,
         compression_type="gzip",
     )
-    messages_processed = 0
+    messages_count = 0
     logger.info("Starting producer...")
     try:
         for province, lat, lon in zip(
@@ -134,10 +137,14 @@ def produce_messages(cities, max_retries=3, timeout=10):
                     if tz:
                         current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
                     else:
-                        current_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%Y-%m-%d %H:%M:%S")
+                        current_time = (
+                            datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+                        ).strftime("%Y-%m-%d %H:%M:%S")
 
                     logger.info(
-                        f"Sending data for {data_weather['province_name']} at {current_time} (GMT+7)..."
+                        "Sending data for %s at %s (GMT+7)...",
+                        data_weather["province_name"],
+                        current_time,
                     )
 
                     # Send with increased timeout
@@ -145,38 +152,41 @@ def produce_messages(cities, max_retries=3, timeout=10):
                     record_metadata = future.get(timeout=timeout)
 
                     logger.info(
-                        f"Successfully sent data for {data_weather['province_name']} "
-                        f"to partition {record_metadata.partition} "
-                        f"at offset {record_metadata.offset}"
+                        "Successfully sent data for %s to partition %s at offset %s",
+                        data_weather["province_name"],
+                        record_metadata.partition,
+                        record_metadata.offset,
                     )
 
-                    messages_processed += 1
+                    messages_count += 1
                     break  # Success, exit retry loop
 
                 except requests.exceptions.RequestException as e:
-                    logger.error(f"API error for {province}: {str(e)}")
+                    logger.error("API error for %s: %s", province, str(e))
                     break  # Don't retry API errors
 
                 except KafkaError as e:
-                    logger.error(f"Error sending data for {province}: {str(e)}")
+                    logger.error("Error sending data for %s: %s", province, str(e))
                     retries += 1
                     if retries == max_retries:
                         logger.error(
-                            f"Failed to send data for {province} after {max_retries} attempts"
+                            "Failed to send data for %s after %d attempts",
+                            province,
+                            max_retries,
                         )
                     else:
-                        logger.info(f"Retrying... ({retries}/{max_retries})")
+                        logger.info("Retrying... (%d/%d)", retries, max_retries)
                         time.sleep(1)  # Wait before retry
 
             time.sleep(1)  # Wait between cities
 
         logger.info("Finished processing all cities.")
-        return messages_processed
+        return messages_count
 
     except KeyboardInterrupt:
         logger.info("Producer stopped by user")
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
+        logger.error("Unexpected error: %s", str(e))
         raise
     finally:
         producer.flush()
@@ -198,19 +208,21 @@ def produce_messages(cities, max_retries=3, timeout=10):
 #         logger.error(f"Failed to send to DLQ: {str(e)}")
 
 if __name__ == "__main__":
+    """Main entry point for the weather data Kafka producer."""
+    import sys
     while True:
         try:
-            cities_df = get_cities_from_snowflake()
-            if cities_df.empty:
+            cities = get_cities_from_snowflake()
+            if cities.empty:
                 logger.error("No cities found in Snowflake. Exiting.")
             else:
                 logger.info(
-                    f"Found {len(cities_df['province_name'])} cities."
-                    "Starting to produce messages..."
+                    "Found %d cities. Starting to produce messages...",
+                    len(cities["province_name"]),
                 )
-                messages_processed = produce_messages(cities_df)
-                logger.info(f"Total messages produced: {messages_processed}")
+                total_messages = produce_messages(cities)
+                logger.info("Total messages produced: %d", total_messages)
         except Exception as e:
-            logger.error(f"Failed to produce messages: {str(e)}")
-            exit(1)
+            logger.error("Failed to produce messages: %s", str(e))
+            sys.exit(1)
         time.sleep(900)
