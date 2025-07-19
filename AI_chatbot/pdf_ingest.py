@@ -11,6 +11,8 @@ from PyPDF2 import PdfReader
 # Load env
 load_dotenv()
 
+#test
+
 # Constants
 PINECONE_INDEX_NAME = "weather-capstone-project"
 PINECONE_NAMESPACE = "weather-data"
