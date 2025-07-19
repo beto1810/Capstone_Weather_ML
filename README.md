@@ -21,6 +21,7 @@ Coverage: All 63 provinces in Vietnam
 - **Machine Learning**: Model training, evaluation, and prediction for weather forecasting
 - **Incremental & Historical Processing**: Efficient, scalable data handling with dbt incremental models
 - **Data Quality & Testing**: dbt tests for data integrity and relationships
+- **AI Chatbot**: Natural language interface for weather data queries and document processing
 - **Containerized Architecture**: Docker-based deployment for all components
 - **Cloud & Local Storage**: Support for large model files via external storage (not tracked in git)
 - **Documentation & Monitoring**: dbt docs, Airflow UI, and logging
@@ -43,8 +44,11 @@ Coverage: All 63 provinces in Vietnam
 │   ├── seeds/                 # Static reference data
 │   └── docs/                  # dbt documentation
 ├── kafka/                     # Kafka producers and consumers
-│   ├── producer.py            # Weather API producer
-│   └── consumer.py            # Data consumer for ingestion
+│   ├── producers/             # Weather API producer
+│   └── consumers/             # Data consumer for ingestion
+├── AI_chatbot/               # AI chatbot with weather data integration
+│   ├── streamlit_app_2.py    # Enhanced weather-specific chatbot
+│   └── pdf_ingest.py         # PDF processing and vector storage
 ├── training_weather_model/    # ML model training scripts and (externally stored) model files
 ├── configs/                   # Configuration files for all services
 ├── data/                      # Local data storage (excluded from git)
@@ -58,27 +62,45 @@ Coverage: All 63 provinces in Vietnam
 
 ## Data Flow
 
-1. **Ingestion**:
-   - Kafka producer fetches weather data from APIs and streams to Kafka topics.
-   - Kafka consumer ingests data into the raw database.
+### 🔄 Real-time Pipeline
+1. **Data Ingestion**:
+   - **Kafka Producer**: Fetches weather data from WeatherAPI for all 63 Vietnamese provinces
+   - **Kafka Consumer**: Streams data into Snowflake raw tables
+   - **Frequency**: Hourly data collection
 
-2. **Staging (dbt)**:
-   - Raw weather data is cleaned and typed in `stg_weather_data`.
-   - Province and district reference data staged.
+2. **Data Processing**:
+   - **Staging Layer**: Raw data cleaning and type casting (`stg_weather_data`)
+   - **Intermediate Layer**: Feature engineering and aggregations (`int_weather_province`)
+   - **Marts Layer**: Analytics-ready fact and dimension tables
 
-3. **Intermediate (dbt)**:
-   - Feature engineering and aggregation in `int_weather_province`
+3. **ML Pipeline**:
+   - **Training**: Historical data feeds ML models for weather prediction
+   - **Prediction**: Models generate 7-day forecasts for temperature, precipitation, humidity, wind, and conditions
+   - **Storage**: Predictions stored in `predict_weather_province_7days` table
 
-4. **Marts (dbt)**:
-   - Fact tables: `fct_weather_province`, `fct_weather_region`
-   - Dimension tables: `dim_vietnam_provinces`, `dim_vietnam_districts`
+4. **Orchestration**:
+   - **Airflow DAGs**: Schedule and monitor entire pipeline
+   - **dbt Runs**: Transform and load data incrementally
+   - **Quality Checks**: Automated testing and validation
 
-5. **Prediction (dbt/ML)**:
-   - ML models trained on historical data.
-   - Predictions written to `predict_weather_province` and similar tables.
+### 📊 Data Architecture
+- **Raw Layer**: Kafka → Snowflake raw tables
+- **Staging Layer**: `stg_weather_data`, `stg_vietnam_provinces`, `stg_vietnam_districts`
+- **Intermediate Layer**: `int_weather_province`, `int_current_weather_province`
+- **Marts Layer**:
+  - **Facts**: `fct_weather_province`, `fct_weather_region`, `fct_current_weather_province`
+  - **Dimensions**: `dim_vietnam_provinces`, `dim_vietnam_districts`
+  - **Predictions**: `predict_weather_province_7days`
 
-6. **Orchestration (Airflow)**:
-   - DAGs schedule and monitor the entire pipeline, including dbt runs and ML tasks.
+---
+
+---
+
+## ERD
+
+![ERD](docs/diagram.png)
+
+- For the editable schema, see the [DBML file](docs/weather_ml_erd.dbml) (compatible with [dbdiagram.io](https://dbdiagram.io)).
 
 ---
 
@@ -116,6 +138,77 @@ This project uses a **multi-output machine learning approach** for short-term we
 
 ---
 
+## 🤖 AI Chatbot
+
+### Overview
+
+The Weather ML project includes an intelligent AI chatbot system that provides natural language interaction with weather data and project documentation. The chatbot leverages multiple AI models and integrates with the data pipeline for real-time weather information.
+
+### 🚀 Features
+
+#### **Multi-Model Support**
+- **OpenAI Models**: GPT-3.5-turbo, GPT-4
+- **Model Switching**: Real-time model selection during conversations
+
+#### **Weather Data Integration**
+- **Current Weather Queries**: Real-time weather data from Snowflake
+- **Historical Weather**: Past weather data with date parsing
+- **Weather Predictions**: 7-day forecast data from ML models
+- **Location Intelligence**: Automatic province/city extraction from queries
+
+#### **Document Processing (RAG)**
+- **PDF Upload**: Upload and process project documentation
+- **Vector Storage**: Pinecone integration for semantic search
+- **Context-Aware Responses**: RAG-powered answers from uploaded documents
+- **Source Attribution**: Automatic source file references in responses
+
+#### **Conversation Management**
+- **Multi-Conversation Support**: Switch between different chat sessions
+- **Memory Persistence**: Conversation history maintained across sessions
+- **Customizable Prompts**: System prompt customization for different use cases
+
+### 🛠️ Technical Architecture
+
+#### **Core Components**
+```
+AI_chatbot/
+├── streamlit_app_2.py        # Enhanced weather-specific chatbot
+├── pdf_ingest.py             # PDF processing and vector storage
+```
+
+#### **AI Tools & Capabilities**
+- **@tool search_similar_chunks()**: RAG-based document search
+- **@tool query_current_weather()**: Real-time weather data queries
+- **@tool query_past_weather()**: Historical weather data with date parsing
+- **@tool query_predict_weather()**: ML prediction data access
+
+#### **Data Sources**
+- **Snowflake Integration**: Direct database queries for weather data
+- **Pinecone Vector DB**: Semantic search for document retrieval
+- **OpenAI Embeddings**: Text vectorization for RAG
+- **LangChain/LangGraph**: Conversation flow management
+
+### 📱 User Interface
+
+#### **Streamlit Web App**
+- **Real-time Chat**: Interactive conversation interface
+- **File Upload**: PDF document processing
+- **Model Selection**: Dropdown for AI model switching
+- **Conversation Management**: Sidebar for session control
+- **Debug Information**: Optional technical details display
+
+
+### 🎯 Use Cases
+
+#### **Weather Data Queries**
+- Current weather conditions for any Vietnamese province
+- Historical weather data with natural date parsing
+- Weather predictions and forecasts
+- Comparative weather analysis
+
+
+---
+
 ## ERD
 
 ![ERD](docs/diagram.png)
@@ -125,25 +218,7 @@ This project uses a **multi-output machine learning approach** for short-term we
 ---
 
 
-```mermaid
-graph TD
-    A[Raw_weather_data] --> B[stg_weather_data]
-    B[stg_weather_data] --> C[int_weather_data]
-    C --> D[fct_weather_province]
-    C --> E[fct_weather_region]
-    D --> F[predicted_weather_province]
-```
-## Data Modeling Approach
-
-Our data model follows a modern data warehouse architecture using dbt and Snowflake. The approach is:
-
-- **Staging tables (`stg_*`)**: Raw data is cleaned and typed, preserving source granularity.
-- **Intermediate models (`int_*`)**: Used for business logic and aggregations before populating fact tables.
-- **Dimension tables (`dim_*`)**: Provide descriptive, slowly changing attributes for provinces and districts, enabling consistent joins and reporting.
-- **Fact tables (`fct_*`)**: Store event-level or aggregated weather measurements, optimized for analytics and reporting.
-
 **Key relationships:**
-- Each province can have multiple districts.
 - Weather data is linked to provinces (and optionally districts) via surrogate keys from dimension tables.
 - All relationships are enforced using foreign keys in the DBML and reflected in the ERD.
 
