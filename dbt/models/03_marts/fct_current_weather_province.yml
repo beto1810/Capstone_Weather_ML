@@ -41,6 +41,7 @@ semantic_models:
   - name: fct_current_weather_province
     model: ref('fct_current_weather_province')
     description: "Weather data by province at the current timestamp"
+    primary_entity: current_weather_province
     entities:
       - name: current_weather_province
         type: foreign
