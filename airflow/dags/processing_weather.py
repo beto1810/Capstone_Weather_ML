@@ -12,6 +12,7 @@ env_file_path = "/opt/airflow/.env"
 raw_env_vars = dotenv_values(env_file_path)
 dbt_env_vars = {k: v for k, v in raw_env_vars.items() if v is not None}
 
+#test1
 
 @dag(
     schedule_interval="20,35,50,5 * * * *",
