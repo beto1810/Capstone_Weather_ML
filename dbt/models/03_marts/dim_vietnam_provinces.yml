@@ -43,10 +43,10 @@ semantic_models:
         type: categorical
         expr: region
       - name: latitude
-        type: numeric
+        type: categorical
         expr: latitude
       - name: longitude
-        type: numeric
+        type: categorical
         expr: longitude
       - name: created_at
         type: time
