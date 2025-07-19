@@ -120,7 +120,7 @@ This project uses a **multi-output machine learning approach** for short-term we
 
 ![ERD](docs/diagram.png)
 
-- For the editable schema, see the [DBML file](docs/erd.dbml) (compatible with [dbdiagram.io](https://dbdiagram.io)).
+- For the editable schema, see the [DBML file](docs/weather_ml_erd.dbml) (compatible with [dbdiagram.io](https://dbdiagram.io)).
 
 ---
 

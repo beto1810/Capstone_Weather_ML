@@ -1,0 +1,75 @@
+// Weather ML System - Entity Relationship Diagram
+// Generated based on dbt models
+
+Table dim_vietnam_provinces {
+  province_id integer [primary key, not null]
+  province_name varchar [not null]
+  province_name_vn varchar
+  latitude decimal(10, 8)
+  longitude decimal(11, 8)
+  region varchar
+  updated_at timestamp
+  created_at timestamp
+}
+
+Table fct_current_weather_province {
+  province_id integer [not null]
+  region varchar
+  province_name varchar
+  weather_updated_at timestamp
+  wind_speed_kph decimal(5, 2)
+  temperature_celsius decimal(4, 1)
+  precipitation_mm decimal(6, 2)
+  humidity_percent integer
+  cloud_cover_percent integer
+  uv_index integer
+  is_daytime boolean
+  weather_condition varchar
+  is_raining boolean
+  created_at timestamp
+}
+
+Table fct_weather_province {
+  province_id integer [not null]
+  province_name varchar [not null]
+  weather_date date [not null]
+  avg_temperature decimal(4, 1) [not null]
+  max_temperature decimal(4, 1) [not null]
+  min_temperature decimal(4, 1) [not null]
+  sum_precipitation decimal(6, 2) [not null]
+  chance_rain decimal(3, 2)
+  avg_humidity integer [not null]
+  avg_wind_kph decimal(5, 2) [not null]
+  avg_wind_mph decimal(5, 2) [not null]
+  region varchar [not null]
+  condition varchar [not null]
+  updated_at timestamp [not null]
+  is_new_row boolean [not null]
+}
+
+Table predict_weather_province_7days {
+  PROVINCE_ID integer [not null]
+  REGION varchar
+  PREDICTED_DATE date [not null]
+  AVG_TEMPERATURE_C decimal(4, 1)
+  MIN_TEMPERATURE_C decimal(4, 1)
+  MAX_TEMPERATURE_C decimal(4, 1)
+  DAILY_CHANCE_OF_RAIN integer
+  TOTAL_PRECIP_MM decimal(6, 2)
+  AVG_HUMIDITY integer
+  MAX_WIND_KPH decimal(5, 2)
+  MAX_WIND_MPH decimal(5, 2)
+  PREDICTED_CONDITION varchar
+  IS_RAINING boolean
+  CREATED_AT timestamp
+  UPDATED_AT timestamp
+}
+
+// Relationships
+Ref: dim_vietnam_provinces.province_id > fct_current_weather_province.province_id
+Ref: dim_vietnam_provinces.province_id > fct_weather_province.province_id
+Ref: dim_vietnam_provinces.province_id > predict_weather_province_7days.PROVINCE_ID
+
+// Composite unique keys
+Ref: fct_weather_province.province_id + fct_weather_province.weather_date [unique]
+Ref: predict_weather_province_7days.PROVINCE_ID + predict_weather_province_7days.PREDICTED_DATE [unique]
