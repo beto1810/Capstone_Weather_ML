@@ -14,7 +14,7 @@ dbt_env_vars = {k: v for k, v in raw_env_vars.items() if v is not None}
 
 
 @dag(
-    schedule_interval="*/15 * * * *",
+    schedule_interval="20,35,50,5 * * * *",
     start_date=datetime(2023, 10, 1),
     catchup=False,
     default_args={
