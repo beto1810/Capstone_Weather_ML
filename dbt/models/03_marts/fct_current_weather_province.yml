@@ -42,14 +42,14 @@ semantic_models:
     model: ref('fct_current_weather_province')
     description: "Weather data by province at the current timestamp"
     entities:
-      - name: province
-        type: primary
+      - name: current_weather_province
+        type: foreign
         expr: province_id
     dimensions:
       - name: region
         type: categorical
         expr: region
-      - name: province_name
+      - name: current_province_name
         type: categorical
         expr: province_name
       - name: weather_date
@@ -152,7 +152,7 @@ saved_queries:
       metrics:
         - current_weather_province
       group_by:
-        - Dimension('province__province_name')
+        - Dimension('current_weather_province__current_province_name')
     exports:
       - name: current_weather_summary
         config:
