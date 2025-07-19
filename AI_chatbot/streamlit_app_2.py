@@ -194,7 +194,7 @@ def query_past_weather(query: str) -> str:
 
     def extract_date_with_llm(query: str) -> str:
         prompt = PromptTemplate.from_template(
-            "Extract the date or time reference from this query: {query}\nReturn only the time-related expression like 'yesterday', 'July 2nd', etc."
+            "Extract the date or time reference from this query: {query}\nReturn only the time-related expression like 'yesterday', 'July 2nd', '23/07/2025', '2025-07-23', etc. If there's a date range, return the first date only."
         )
         result = llm.invoke(prompt.format(query=query)).content
         if isinstance(result, list):
@@ -204,6 +204,28 @@ def query_past_weather(query: str) -> str:
     city = extract_location_with_llm(query)
     date_filter = extract_date_with_llm(query)
     parsed_date = dateparser.parse(date_filter)
+    if not parsed_date:
+        # Try to parse date directly from the query if LLM fails
+        parsed_date = dateparser.parse(query)
+        if parsed_date:
+            date_filter = parsed_date.strftime("%Y-%m-%d")
+        else:
+            # Try to extract date patterns from the query
+            import re
+            date_patterns = [
+                r'\d{2}/\d{2}/\d{4}',  # DD/MM/YYYY
+                r'\d{4}-\d{2}-\d{2}',  # YYYY-MM-DD
+                r'\d{2}-\d{2}-\d{4}',  # DD-MM-YYYY
+            ]
+            for pattern in date_patterns:
+                match = re.search(pattern, query)
+                if match:
+                    parsed_date = dateparser.parse(match.group())
+                    if parsed_date:
+                        date_filter = parsed_date.strftime("%Y-%m-%d")
+                        break
+            if not parsed_date:
+                date_filter = "unknown"
     FCT_HISTORY = "FCT_WEATHER_PROVINCE"
     sql = f"SELECT {FCT_HISTORY}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {FCT_HISTORY} JOIN DIM_VIETNAM_PROVINCES ON {FCT_HISTORY}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
     params = [city]
@@ -260,7 +282,7 @@ def query_predict_weather(query: str) -> str:
 
     def extract_date_with_llm(query: str) -> str:
         prompt = PromptTemplate.from_template(
-            "Extract the date or time reference from this query: {query}\nReturn only the time-related expression like 'tomorrow', 'next week', etc."
+            "Extract the date or time reference from this query: {query}\nReturn only the time-related expression like 'tomorrow', 'next week', '23/07/2025', '2025-07-23', etc. If there's a date range, return the first date only."
         )
         result = llm.invoke(prompt.format(query=query)).content
         if isinstance(result, list):
@@ -276,7 +298,22 @@ def query_predict_weather(query: str) -> str:
         if parsed_date:
             date_filter = parsed_date.strftime("%Y-%m-%d")
         else:
-            date_filter = "unknown"
+            # Try to extract date patterns from the query
+            import re
+            date_patterns = [
+                r'\d{2}/\d{2}/\d{4}',  # DD/MM/YYYY
+                r'\d{4}-\d{2}-\d{2}',  # YYYY-MM-DD
+                r'\d{2}-\d{2}-\d{4}',  # DD-MM-YYYY
+            ]
+            for pattern in date_patterns:
+                match = re.search(pattern, query)
+                if match:
+                    parsed_date = dateparser.parse(match.group())
+                    if parsed_date:
+                        date_filter = parsed_date.strftime("%Y-%m-%d")
+                        break
+            if not parsed_date:
+                date_filter = "unknown"
     FCT_FORECAST = "PREDICT_WEATHER_PROVINCE_7DAYS"
     sql = f"SELECT {FCT_FORECAST}.*, DIM_VIETNAM_PROVINCES.PROVINCE_NAME FROM {FCT_FORECAST} JOIN DIM_VIETNAM_PROVINCES ON {FCT_FORECAST}.PROVINCE_ID = DIM_VIETNAM_PROVINCES.PROVINCE_ID WHERE DIM_VIETNAM_PROVINCES.province_name ILIKE %s"
     params = [city]
@@ -483,9 +520,9 @@ def main():
         return
 
     st.set_page_config(
-        page_title="FoundryAI RAG Chatbot", page_icon="🧠", layout="wide"
+        page_title="Weather AI Chatbot", page_icon="☀️", layout="wide"
     )
-    st.title("🧠 Weather AI ChatBot")
+    st.title("☀️🌧️⛅ Weather AI ChatBot")
 
     init_session_state()
     config_sidebar()

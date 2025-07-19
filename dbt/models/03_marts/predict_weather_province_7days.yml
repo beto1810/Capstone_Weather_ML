@@ -8,6 +8,9 @@ models:
         description: "Unique identifier for the province."
         tests:
           - not_null
+          - relationships:
+              to: ref('dim_vietnam_provinces')
+              field: province_id
       - name: REGION
         description: "Region to which the province belongs."
       - name: PREDICTED_DATE

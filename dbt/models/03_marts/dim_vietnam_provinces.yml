@@ -24,4 +24,18 @@ models:
       - name: created_at
         description: "Row creation timestamp"
 
-
+semantic_models:
+  - name: dim_vietnam_provinces
+    model: ref('dim_vietnam_provinces')
+    description: "Vietnamese provinces and regions"
+    entities:
+      - name: province
+        type: primary
+        expr: province_id
+    dimensions:
+      - name: province_name
+        type: categorical
+        expr: province_name
+      - name: region
+        type: categorical
+        expr: region
