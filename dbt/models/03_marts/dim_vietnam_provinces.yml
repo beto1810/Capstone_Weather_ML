@@ -27,7 +27,7 @@ models:
 semantic_models:
   - name: dim_vietnam_provinces
     model: ref('dim_vietnam_provinces')
-    description: "Vietnamese provinces and regions"
+    description: "Vietnamese provinces including location and region metadata."
     entities:
       - name: province
         type: primary
@@ -36,6 +36,25 @@ semantic_models:
       - name: province_name
         type: categorical
         expr: province_name
+      - name: province_name_vn
+        type: categorical
+        expr: province_name_vn
       - name: region
         type: categorical
         expr: region
+      - name: latitude
+        type: numeric
+        expr: latitude
+      - name: longitude
+        type: numeric
+        expr: longitude
+      - name: created_at
+        type: time
+        expr: created_at
+        type_params:
+          time_granularity: day
+      - name: updated_at
+        type: time
+        expr: updated_at
+        type_params:
+          time_granularity: day
