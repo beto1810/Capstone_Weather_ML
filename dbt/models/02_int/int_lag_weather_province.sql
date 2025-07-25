@@ -16,7 +16,7 @@ WITH latest_data AS (
     FROM {{ ref('int_weather_province') }} AS fct
     INNER JOIN {{ ref('dim_vietnam_provinces') }} AS dim
         ON fct.province_id = dim.province_id
-    WHERE fct.weather_date >= DATEADD(DAY, -3, CURRENT_DATE())
+    WHERE fct.weather_date >= DATEADD(DAY, -4, CURRENT_DATE())
 ),
 
 base AS (
