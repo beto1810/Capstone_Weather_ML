@@ -32,7 +32,7 @@ cast_type as (
         cast(uv as float) as uv_index,
         cast(gust_mph as float) as wind_gust_mph,
         cast(gust_kph as float) as wind_gust_kph,
-        cast(loaded_at as timestamp) as record_loaded_at
+        cast(last_updated as timestamp) as record_loaded_at
     from source_cte
 
 )

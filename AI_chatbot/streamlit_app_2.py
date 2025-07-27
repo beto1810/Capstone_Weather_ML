@@ -24,7 +24,7 @@ import re
 load_dotenv()
 
 # Constants
-DEFAULT_MODEL = "gpt-3.5-turbo"
+DEFAULT_MODEL = "gpt-4"
 PINECONE_INDEX_NAME = "weather-capstone-project"
 PINECONE_NAMESPACE = "weather-data"
 TOP_K_RESULTS = 2
@@ -81,7 +81,7 @@ def search_similar_chunks(query: str) -> str:
         context = "\n\n".join(formatted_chunks)
 
         # More informative system prompt
-        system_prompt = f"""You are a helpful assistant. Use the extracted context below from uploaded PDFs to answer the user's question. When needed, you may also use your general knowledge to fill in gaps.
+        system_prompt = f"""You are a helpful assistant. Use the extracted context below from uploaded PDFs to answer the user's question.
 
 PDF Context Chunks:
 {context}

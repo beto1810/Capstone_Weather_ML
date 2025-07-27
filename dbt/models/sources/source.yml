@@ -94,10 +94,7 @@ sources:
           - name: gust_kph
             description: "Wind gust speed in kilometers per hour"
 
-          - name: loaded_at
-            description: "Timestamp when the record was loaded into Snowflake"
-            tests:
-              - not_null
+
 
   - name : vietnam_geo_data
     database: KAFKA_AIRFLOW_WEATHER

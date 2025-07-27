@@ -59,8 +59,7 @@ def load_to_snowflake(rows):
                 vis_miles FLOAT,
                 uv FLOAT,
                 gust_mph FLOAT,
-                gust_kph FLOAT,
-                loaded_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+                gust_kph FLOAT
             )
         """
         )
@@ -76,7 +75,7 @@ def load_to_snowflake(rows):
                 vis_km, vis_miles, uv, gust_mph, gust_kph
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s)
+                    %s, %s, %s, %s, %s,%s)
         """
 
         print("First row to insert: %s", rows[0] if rows else 'No rows', flush=True)
@@ -119,7 +118,7 @@ def transform_to_row(data_weather):
         data_weather["vis_miles"],
         data_weather["uv"],
         data_weather["gust_mph"],
-        data_weather["gust_kph"],
+        data_weather["gust_kph"]
     )
 
 
