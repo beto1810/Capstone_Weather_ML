@@ -6,12 +6,31 @@ import time
 from dotenv import load_dotenv
 from snowflake.connector import connect
 from kafka import KafkaConsumer # type: ignore
+import csv
 
 
 BATCH_SIZE = 50  # You can adjust this
 TIMEOUT_MS = 5000  # Default timeout for Kafka polling
 
 load_dotenv()
+
+
+def save_failed_batch_to_csv(batch, filename="failed_batches.csv"):
+    """Append failed batch rows to a CSV file."""
+    header = [
+        "province_name", "last_updated", "temp_c", "temp_f", "is_day",
+        "condition_text", "condition_icon", "condition_code",
+        "wind_mph", "wind_kph", "wind_degree", "wind_dir",
+        "pressure_mb", "pressure_in", "precip_mm", "precip_in",
+        "humidity", "cloud", "feelslike_c", "feelslike_f",
+        "vis_km", "vis_miles", "uv", "gust_mph", "gust_kph"
+    ]
+    file_exists = os.path.isfile(filename)
+    with open(filename, mode="a", newline="") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(header)
+        writer.writerows(batch)
 
 
 def load_to_snowflake(rows):
@@ -26,43 +45,13 @@ def load_to_snowflake(rows):
             warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
             database=os.getenv("SNOWFLAKE_DATABASE"),
             schema=os.getenv("SNOWFLAKE_SCHEMA_RAW_DATA"),
+            role = os.getenv("SNOWFLAKE_ROLE")
         )
         print("Connected to snowflake", flush=True)
 
         cursor = conn.cursor()
 
-        # Create a more detailed table schema matching the Weather API response
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS raw_weather_data (
-                province_name VARCHAR,
-                last_updated TIMESTAMP_NTZ,
-                temp_c FLOAT,
-                temp_f FLOAT,
-                is_day BOOLEAN,
-                condition_text VARCHAR,
-                condition_icon VARCHAR,
-                condition_code INTEGER,
-                wind_mph FLOAT,
-                wind_kph FLOAT,
-                wind_degree INTEGER,
-                wind_dir VARCHAR,
-                pressure_mb FLOAT,
-                pressure_in FLOAT,
-                precip_mm FLOAT,
-                precip_in FLOAT,
-                humidity INTEGER,
-                cloud INTEGER,
-                feelslike_c FLOAT,
-                feelslike_f FLOAT,
-                vis_km FLOAT,
-                vis_miles FLOAT,
-                uv FLOAT,
-                gust_mph FLOAT,
-                gust_kph FLOAT
-            )
-        """
-        )
+
 
         # Insert data with all available fields
         insert_query = """
@@ -75,7 +64,7 @@ def load_to_snowflake(rows):
                 vis_km, vis_miles, uv, gust_mph, gust_kph
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s,%s)
+                    %s, %s, %s, %s, %s)
         """
 
         print("First row to insert: %s", rows[0] if rows else 'No rows', flush=True)
@@ -85,6 +74,7 @@ def load_to_snowflake(rows):
 
     except Exception as e:
         logging.error("❌ Error loading to Snowflake: %s", e)
+        save_failed_batch_to_csv(rows)  # Save the failed batch to CSV
         raise
     finally:
         if "conn" in locals():
